@@ -1,6 +1,5 @@
 import { api } from "@/shared/services/api";
 import { LoginRequestAppDto, LoginResponseAppDto } from "../dtos/login-app-dto"
-import { access } from "fs";
 
 export type LoginRequestApiDto = LoginRequestAppDto;
 export type LoginResponseApiDto = LoginResponseAppDto;
