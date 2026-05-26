@@ -1,0 +1,54 @@
+.contentHeader {
+  align-items: center;
+  display: flex;
+  gap: 10px;
+  min-width: 0;
+}
+
+.icon {
+  align-items: center;
+  color: var(--content-header-icon-color);
+  display: inline-flex;
+  flex: 0 0 auto;
+  height: 38px;
+  justify-content: center;
+  position: relative;
+  width: 38px;
+}
+
+.icon::after {
+  background: var(--content-header-accent);
+  border-radius: 999px;
+  bottom: 0;
+  content: "";
+  height: 4px;
+  left: 5px;
+  opacity: 0.9;
+  position: absolute;
+  width: 28px;
+}
+
+.icon svg {
+  display: block;
+  font-size: 36px;
+  height: 36px;
+  width: 36px;
+}
+
+.title {
+  color: var(--content-header-title-color);
+  font-size: 30px;
+  font-weight: 800;
+  letter-spacing: 0;
+  line-height: 1.15;
+  margin: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+@media (max-width: 760px) {
+  .title {
+    font-size: 24px;
+  }
+}

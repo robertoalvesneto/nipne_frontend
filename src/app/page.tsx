@@ -8,6 +8,7 @@ import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { useLogin } from "@/modules/auth/hooks/use-login";
 import { useLoginSchema, type UseLoginSchema } from "@/modules/auth/schemas/use-login-schema";
+import { DefaultRouteByPerfil } from "@/modules/usuario/constants/default-route-by-perfil";
 import { Card } from "@/shared/components/card/card";
 
 import styles from './page.module.css';
@@ -31,10 +32,10 @@ export default function Home() {
   });
 
   useEffect(() => {
-    if (loginMutation.isSuccess) {
-      router.refresh();
+    if (loginMutation.isSuccess && loginMutation.data) {
+      router.replace(DefaultRouteByPerfil[loginMutation.data.payload.perfil]);
     }
-  }, [loginMutation.isSuccess, router]);
+  }, [loginMutation.data, loginMutation.isSuccess, router]);
 
   const onSubmit = handleSubmit((data) => {
     loginMutation.mutate(data);
