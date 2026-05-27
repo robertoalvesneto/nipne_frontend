@@ -1,9 +1,17 @@
 import { api } from "@/shared/services/api";
-import { LoginRequestAppDto, LoginResponseAppDto } from "../dtos/login-app-dto";
 import type { JwtPayload } from "../interfaces/jwt-payload";
 
-export type LoginRequestApiDto = LoginRequestAppDto;
-export type LoginResponseApiDto = LoginResponseAppDto;
+export interface LoginRequestApiDto {
+    email: string;
+    password: string;
+}
+
+export interface LoginResponseApiDto {
+    accessToken: string;
+    refreshToken: string;
+    payload: JwtPayload;
+}
+
 
 function encodeBase64Url(value: string) {
   const bytes = new TextEncoder().encode(value);

@@ -1,0 +1,95 @@
+.wrapper {
+  min-width: 0;
+  overflow-x: auto;
+  width: 100%;
+}
+
+.table {
+  border-collapse: separate !important;
+  border-spacing: 0 !important;
+  color: #4a4a4a;
+  font-size: 14px;
+  line-height: 1.35;
+  min-width: 760px;
+  table-layout: fixed;
+  width: 100%;
+}
+
+.headerCell {
+  background: #d7e4dc;
+  border-bottom: 0 !important;
+  color: #222222 !important;
+  font-size: 12px !important;
+  font-weight: 800 !important;
+  height: 26px;
+  line-height: 1.2 !important;
+  padding: 5px 16px !important;
+  white-space: nowrap;
+}
+
+.headerCell:first-child {
+  border-bottom-left-radius: 8px;
+  border-top-left-radius: 8px;
+}
+
+.headerCell:last-child {
+  border-bottom-right-radius: 8px;
+  border-top-right-radius: 8px;
+}
+
+.row {
+  background: transparent;
+}
+
+.row:hover {
+  background: rgba(22, 101, 52, 0.04);
+}
+
+.cell {
+  border-bottom: 0 !important;
+  color: #4a4a4a !important;
+  font-size: 14px !important;
+  font-weight: 500 !important;
+  height: 46px;
+  overflow: hidden;
+  padding: 8px 16px !important;
+  text-overflow: ellipsis;
+  vertical-align: middle;
+}
+
+.cell:first-child {
+  color: #444444 !important;
+  font-weight: 800 !important;
+}
+
+.actionsHeader {
+  width: 48px;
+}
+
+.actionsCell {
+  color: #1f6f4a;
+  padding-left: 8px;
+  padding-right: 8px;
+  text-align: center;
+  white-space: nowrap;
+}
+
+.stateCell {
+  color: #64748b;
+  font-size: 14px;
+  font-weight: 600;
+  padding: 28px 16px;
+  text-align: center;
+}
+
+@media (max-width: 760px) {
+  .table {
+    min-width: 640px;
+  }
+
+  .headerCell,
+  .cell {
+    padding-left: 12px;
+    padding-right: 12px;
+  }
+}

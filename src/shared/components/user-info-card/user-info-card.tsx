@@ -5,27 +5,11 @@ import { useState } from "react";
 import type { JwtPayload } from "@/modules/auth/interfaces/jwt-payload";
 import { logout } from "@/modules/auth/libs/auth";
 import styles from "./user-info-card.module.css";
+import { roleLabelByPerfil } from "@/modules/usuario/utils/perfil-role-label";
+import { getInitials } from "@/modules/usuario/utils/user-get-initials";
 
 interface UserInfoCardProps {
   payload: JwtPayload;
-}
-
-const roleLabelByPerfil: Record<JwtPayload["perfil"], string> = {
-  ALUNO: "Aluno",
-  PROFESSOR: "Professor",
-  COORDENADOR: "Coordenador",
-  BOLSISTA: "Bolsista",
-  GESTOR: "Reitor",
-};
-
-function getInitials(name: string) {
-  return name
-    .split(" ")
-    .filter(Boolean)
-    .slice(0, 2)
-    .map((part) => part[0])
-    .join("")
-    .toUpperCase();
 }
 
 export function UserInfoCard({ payload }: UserInfoCardProps) {

@@ -1,0 +1,101 @@
+.userButton {
+  align-items: flex-start;
+  background: transparent;
+  border: 0;
+  color: #3f3f3f;
+  cursor: pointer;
+  display: inline-flex;
+  flex-direction: column;
+  font: inherit;
+  font-weight: 800;
+  gap: 2px;
+  max-width: 100%;
+  padding: 0;
+  text-align: left;
+}
+
+.userText {
+  align-items: flex-start;
+  color: #3f3f3f;
+  display: inline-flex;
+  flex-direction: column;
+  font-weight: 800;
+  gap: 2px;
+  max-width: 100%;
+}
+
+.userButton:hover,
+.userButton:focus-visible {
+  color: #1f6f4a;
+  outline: none;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.userEmail {
+  color: #64748b;
+  display: block;
+  font-size: 12px;
+  font-weight: 600;
+  max-width: 100%;
+  overflow: hidden;
+  text-decoration: none;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.idText {
+  color: #444444;
+  font-weight: 800;
+}
+
+.activeStatus,
+.inactiveStatus {
+  font-weight: 800;
+}
+
+.activeStatus {
+  color: #3f3f3f;
+}
+
+.inactiveStatus {
+  color: #991b1b;
+}
+
+.actionGroup {
+  align-items: center;
+  display: inline-flex;
+  gap: 4px;
+  justify-content: center;
+}
+
+.iconButton {
+  color: #1f6f4a !important;
+}
+
+.iconButton:hover,
+.iconButton:focus-visible {
+  background: rgba(31, 111, 74, 0.1) !important;
+}
+
+.actionButton {
+  align-items: center;
+  background: transparent;
+  border: 0;
+  border-radius: 6px;
+  color: #1f6f4a;
+  cursor: pointer;
+  display: inline-flex;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 800;
+  justify-content: center;
+  min-height: 32px;
+  padding: 6px 8px;
+}
+
+.actionButton:hover,
+.actionButton:focus-visible {
+  background: rgba(31, 111, 74, 0.1);
+  outline: none;
+}
