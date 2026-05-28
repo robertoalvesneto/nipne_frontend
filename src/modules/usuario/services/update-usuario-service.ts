@@ -7,6 +7,7 @@ export interface UpdateUsuarioBodyApiDto {
   email?: string;
   password?: string;
   profile?: PerfilUsuario;
+  ativo?: boolean;
 }
 
 export type UpdateUsuarioResponseApiDto = Usuario;

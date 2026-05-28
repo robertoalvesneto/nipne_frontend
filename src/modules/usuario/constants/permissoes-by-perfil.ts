@@ -2,10 +2,10 @@ import type { PerfilUsuario } from "../types/perfil-usuario";
 
 export const permissoesByPerfil: Record<PerfilUsuario, string[]> = {
   GESTOR: [
-    "Alunos",
-    "Escutas",
-    "Ocorrências",
+    "Indicadores",
+    "Atendimentos",
     "Disciplinas",
+    "Professores",
     "Usuários",
     "Configurações",
   ],

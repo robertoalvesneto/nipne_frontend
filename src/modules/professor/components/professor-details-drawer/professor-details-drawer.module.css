@@ -1,0 +1,160 @@
+.drawer {
+  border-radius: 0 !important;
+  max-width: min(812px, 100vw);
+  width: min(812px, 100vw);
+}
+
+.panel {
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr) auto;
+  min-height: 100%;
+  padding: 34px 32px;
+}
+
+.header {
+  align-items: center;
+  border-bottom: 1px solid #3f3f3f;
+  display: flex;
+  gap: 16px;
+  justify-content: space-between;
+  padding-bottom: 22px;
+}
+
+.titleGroup {
+  align-items: center;
+  color: #333333;
+  display: flex;
+  gap: 12px;
+  min-width: 0;
+}
+
+.titleGroup h2 {
+  font-size: 26px;
+  line-height: 1.2;
+  overflow-wrap: anywhere;
+}
+
+.titleGroup h2 span {
+  color: #8b8b8b;
+}
+
+.titleIcon {
+  color: #3f3f3f;
+  flex: 0 0 auto;
+  font-size: 42px !important;
+}
+
+.content {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  overflow-y: auto;
+  padding-top: 18px;
+}
+
+.statusSection,
+.unitsSection {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.statusControl {
+  align-items: center;
+  background: #fbfbfb;
+  border-radius: 4px;
+  display: inline-flex;
+  gap: 4px;
+  min-height: 44px;
+  padding: 0 12px;
+}
+
+.detailsGrid {
+  display: grid;
+  gap: 18px 16px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.detailsGrid div {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.detailsGrid dt,
+.unitsSection strong,
+.statusSection strong {
+  color: #2f2f2f;
+  font-weight: 800;
+}
+
+.detailsGrid dd {
+  background: #fbfbfb;
+  border-radius: 4px;
+  color: #333333;
+  margin: 0;
+  min-height: 44px;
+  overflow-wrap: anywhere;
+  padding: 13px 16px;
+}
+
+.unitList {
+  display: grid;
+  gap: 8px;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.unitList li {
+  align-items: center;
+  background: #fbfbfb;
+  border-radius: 4px;
+  color: #333333;
+  display: flex;
+  gap: 10px;
+  min-height: 44px;
+  padding: 10px 14px;
+}
+
+.unitList span {
+  background: #d7e4dc;
+  border-radius: 4px;
+  color: #1f3f2e;
+  flex: 0 0 auto;
+  font-size: 12px;
+  font-weight: 800;
+  padding: 4px 8px;
+}
+
+.unitsSection p {
+  color: #64748b;
+  margin: 0;
+}
+
+.footer {
+  align-items: center;
+  border-top: 1px solid #3f3f3f;
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 28px;
+  padding-top: 16px;
+}
+
+.footer button {
+  min-width: 150px;
+}
+
+@media (max-width: 640px) {
+  .panel {
+    padding: 24px 18px;
+  }
+
+  .titleGroup h2 {
+    font-size: 22px;
+  }
+
+  .detailsGrid {
+    grid-template-columns: 1fr;
+  }
+}

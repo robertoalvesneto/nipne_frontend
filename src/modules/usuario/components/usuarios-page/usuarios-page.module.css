@@ -1,0 +1,59 @@
+.page {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  min-height: 0;
+}
+
+.filters {
+  align-items: center;
+  display: flex;
+  gap: 12px;
+  justify-content: space-between;
+  width: 100%;
+}
+
+.filterGroup {
+  align-items: center;
+  display: flex;
+  flex: 1 1 auto;
+  gap: 12px;
+  min-width: 0;
+}
+
+.searchField {
+  max-width: 420px;
+  width: 100%;
+}
+
+.profileField {
+  min-width: 220px !important;
+}
+
+.addButton {
+  border-radius: 6px !important;
+  flex: 0 0 auto;
+  min-height: 42px;
+  padding-inline: 18px !important;
+}
+
+@media (max-width: 760px) {
+  .filters {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .filterGroup {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .searchField {
+    max-width: none;
+  }
+
+  .profileField {
+    min-width: 0 !important;
+    width: 100%;
+  }
+}

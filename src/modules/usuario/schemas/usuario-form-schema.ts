@@ -15,6 +15,7 @@ const usuarioBaseFormSchema = z.object({
   profile: z.enum(perfilUsuarioValues, {
     error: "Selecione um perfil",
   }),
+  ativo: z.boolean(),
 });
 
 export const createUsuarioFormSchema = usuarioBaseFormSchema.extend({

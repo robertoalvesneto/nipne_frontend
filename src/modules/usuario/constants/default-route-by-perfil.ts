@@ -1,7 +1,7 @@
 import { PerfilUsuario } from "../types/perfil-usuario";
 
 export const DefaultRouteByPerfil: Record<PerfilUsuario, string> = {
-  GESTOR: "/auth/coordenador/alunos",
+  GESTOR: "/auth/reitor/indicadores",
   COORDENADOR: "/auth/coordenador/alunos",
   BOLSISTA: "/auth/coordenador/alunos",
   ALUNO: "/auth/aluno/meus-dados",
