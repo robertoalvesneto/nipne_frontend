@@ -1,0 +1,52 @@
+.alunoButton {
+  align-items: flex-start;
+  background: transparent;
+  border: 0;
+  color: #3f3f3f;
+  cursor: pointer;
+  display: inline-flex;
+  font: inherit;
+  font-weight: 800;
+  max-width: 100%;
+  padding: 0;
+  text-align: left;
+}
+
+.alunoText {
+  color: #3f3f3f;
+  font-weight: 800;
+}
+
+.alunoButton:hover,
+.alunoButton:focus-visible {
+  color: #1f6f4a;
+  outline: none;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.idText,
+.activeStatus,
+.inactiveStatus {
+  font-weight: 800;
+}
+
+.inactiveStatus {
+  color: #991b1b;
+}
+
+.actionGroup {
+  align-items: center;
+  display: inline-flex;
+  gap: 4px;
+  justify-content: center;
+}
+
+.iconButton {
+  color: #1f6f4a !important;
+}
+
+.iconButton:hover,
+.iconButton:focus-visible {
+  background: rgba(31, 111, 74, 0.1) !important;
+}

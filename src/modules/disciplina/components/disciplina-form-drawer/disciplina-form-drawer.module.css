@@ -1,0 +1,49 @@
+.drawer {
+  border-radius: 0 !important;
+  max-width: min(812px, 100vw);
+  padding: 34px 32px;
+  width: min(812px, 100vw);
+}
+
+.header {
+  align-items: center;
+  border-bottom: 1px solid #3f3f3f;
+  display: flex;
+  gap: 16px;
+  justify-content: space-between;
+  padding-bottom: 22px;
+}
+
+.titleGroup {
+  align-items: center;
+  color: #333333;
+  display: flex;
+  gap: 12px;
+  min-width: 0;
+}
+
+.titleGroup h2 {
+  font-size: 26px;
+  line-height: 1.2;
+  overflow-wrap: anywhere;
+}
+
+.titleIcon {
+  color: #3f3f3f;
+  flex: 0 0 auto;
+  font-size: 42px !important;
+}
+
+.content {
+  padding-top: 28px;
+}
+
+@media (max-width: 640px) {
+  .drawer {
+    padding: 24px 18px;
+  }
+
+  .titleGroup h2 {
+    font-size: 22px;
+  }
+}

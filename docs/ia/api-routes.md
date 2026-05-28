@@ -381,6 +381,15 @@ type StudentCurrentCourse = {
   sigla: string;
   matricula: string;
   status: StatusMatriculaCurso;
+  quantidadeMaterias: number;
+  periodoLetivoAtual: StudentCurrentAcademicPeriod | null;
+};
+
+type StudentCurrentAcademicPeriod = {
+  id: string;
+  nome: string;
+  dataInicio: string;
+  dataFim: string;
 };
 
 type StudentListItem = {
@@ -461,6 +470,7 @@ type StudentListQuery = {
   matricula?: string; // max 50
   ativo?: boolean;
   unidadeAcademicaId?: string; // UUID
+  cursoId?: string; // UUID
   sortBy?: 'nome' | 'nomeSocial' | 'emailInstitucional' | 'matricula' | 'createdAt';
   sortDirection?: 'asc' | 'desc';
 };
@@ -811,10 +821,17 @@ type ClassGroup = {
   nome: string;
   sigla: string;
   ativo: boolean;
+  matriculados: number;
   createdAt: string;
   updatedAt: string;
   disciplina: Discipline;
   periodoLetivo: AcademicPeriod;
+  professores: Array<{
+    id: string;
+    vinculoId: string;
+    ativo: boolean;
+    pessoaInstitucional: InstitutionalPerson;
+  }>;
 };
 ```
 
@@ -844,6 +861,7 @@ type ClassGroupListQuery = {
   page?: number;
   pageSize?: number;
   disciplinaId?: string; // UUID
+  cursoId?: string; // UUID
   periodoLetivoId?: string; // UUID
   nome?: string; // max 150
   sigla?: string; // max 30

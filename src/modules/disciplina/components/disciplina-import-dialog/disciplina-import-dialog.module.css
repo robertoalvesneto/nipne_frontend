@@ -1,0 +1,99 @@
+.dialog {
+  border-radius: 6px !important;
+  padding: 0;
+}
+
+.header {
+  align-items: center;
+  border-bottom: 1px solid #d9d9d9;
+  display: flex;
+  gap: 16px;
+  justify-content: space-between;
+  padding: 22px 24px 18px;
+}
+
+.titleGroup {
+  align-items: center;
+  display: flex;
+  gap: 10px;
+}
+
+.titleGroup h2 {
+  color: #333333;
+  font-size: 24px;
+  line-height: 1.2;
+  margin: 0;
+}
+
+.warningIcon {
+  color: #8a5c00;
+  font-size: 34px !important;
+}
+
+.content {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 24px;
+}
+
+.content p {
+  color: #333333;
+  line-height: 1.45;
+  margin: 0;
+}
+
+.hint {
+  color: #5e5e5e !important;
+  font-size: 14px;
+}
+
+.fileBox {
+  align-items: center;
+  background: #fbfbfb;
+  border: 1px dashed #8b8b8b;
+  border-radius: 6px;
+  display: grid;
+  gap: 12px;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  min-height: 82px;
+  padding: 16px;
+}
+
+.fileBox svg {
+  color: #1f6f4a;
+  font-size: 34px;
+}
+
+.fileBox span {
+  color: #333333;
+  font-weight: 700;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.actions {
+  align-items: center;
+  border-top: 1px solid #d9d9d9;
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+  padding: 16px 24px 22px;
+}
+
+.actions button {
+  min-width: 120px;
+}
+
+@media (max-width: 640px) {
+  .header,
+  .content,
+  .actions {
+    padding-inline: 18px;
+  }
+
+  .fileBox {
+    grid-template-columns: 1fr;
+  }
+}

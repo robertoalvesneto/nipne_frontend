@@ -1,0 +1,109 @@
+.page {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  min-height: 0;
+}
+
+.filters {
+  align-items: center;
+  display: flex;
+  gap: 12px;
+  justify-content: space-between;
+  width: 100%;
+}
+
+.filterGroup {
+  align-items: center;
+  display: flex;
+  flex: 1 1 auto;
+  gap: 12px;
+  min-width: 0;
+}
+
+.searchField {
+  max-width: 330px;
+  width: 100%;
+}
+
+.courseField {
+  min-width: 280px !important;
+}
+
+.statusField {
+  min-width: 150px !important;
+}
+
+.actions {
+  align-items: center;
+  display: flex;
+  flex: 0 0 auto;
+  gap: 10px;
+}
+
+.addButton,
+.importButton {
+  border-radius: 6px !important;
+  min-height: 42px;
+  padding-inline: 18px !important;
+}
+
+.importButton {
+  border-color: #1f6f4a !important;
+  color: #1f6f4a !important;
+}
+
+.paginationBar {
+  align-items: center;
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+}
+
+.pageButton {
+  border: 1px solid #7aa68e !important;
+  border-radius: 4px !important;
+  color: #1f6f4a !important;
+  height: 32px;
+  width: 36px;
+}
+
+.pageButton:disabled {
+  border-color: #b8c9c0 !important;
+  color: #9aae9f !important;
+}
+
+.pageInfo {
+  color: #1f6f4a;
+  font-size: 13px;
+  font-weight: 800;
+  min-width: 66px;
+  text-align: center;
+}
+
+@media (max-width: 1080px) {
+  .filters {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .filterGroup,
+  .actions {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .searchField {
+    max-width: none;
+  }
+
+  .courseField,
+  .statusField {
+    min-width: 0 !important;
+    width: 100%;
+  }
+
+  .paginationBar {
+    justify-content: center;
+  }
+}

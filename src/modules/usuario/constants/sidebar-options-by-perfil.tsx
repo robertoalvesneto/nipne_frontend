@@ -47,25 +47,25 @@ export const ReitorSidebarOptions: SidebarOptions = [
   {
     name: "Indicadores",
     icon: <InsightsOutlinedIcon />,
-    path: "/auth/reitor/indicadores/",
+    path: "/auth/gestor/indicadores/",
     ariaLabel: "Indicadores",
   },
   {
     name: "Atendimentos",
     icon: <QuestionAnswerOutlinedIcon />,
-    path: "/auth/reitor/atendimentos/",
+    path: "/auth/gestor/atendimentos/",
     ariaLabel: "Atendimentos",
   },
   {
     name: "Disciplinas",
     icon: <MenuBookRoundedIcon />,
-    path: "/auth/reitor/disciplinas/",
+    path: "/auth/gestor/disciplinas/",
     ariaLabel: "Disciplinas",
   },
   {
     name: "Professores",
     icon: <SchoolOutlinedIcon />,
-    path: "/auth/reitor/professores/",
+    path: "/auth/gestor/professores/",
     ariaLabel: "Professores",
   },
 ];
@@ -74,7 +74,7 @@ export const ReitorSidebarSideOptions: SidebarOptions = [
   {
     name: "Usuários",
     icon: <GroupOutlinedIcon />,
-    path: "/auth/reitor/usuarios/",
+    path: "/auth/gestor/usuarios/",
     ariaLabel: "Usuários",
   },
 ];
