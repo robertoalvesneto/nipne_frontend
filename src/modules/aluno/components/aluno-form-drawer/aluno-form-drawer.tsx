@@ -5,12 +5,17 @@ import SchoolOutlinedIcon from "@mui/icons-material/SchoolOutlined";
 import { Drawer, IconButton } from "@mui/material";
 import {
   AlunoForm,
+  type AlunoFormInitialValues,
+  type AlunoFormMode,
   type AlunoFormSubmitValues,
 } from "../aluno-form/aluno-form";
 import styles from "./aluno-form-drawer.module.css";
 
 export interface AlunoFormDrawerProps {
   open: boolean;
+  mode?: AlunoFormMode;
+  initialValues?: AlunoFormInitialValues;
+  isLoading?: boolean;
   isSubmitting?: boolean;
   errorMessage?: string;
   onClose: () => void;
@@ -19,6 +24,9 @@ export interface AlunoFormDrawerProps {
 
 export function AlunoFormDrawer({
   open,
+  mode = "create",
+  initialValues,
+  isLoading,
   isSubmitting,
   errorMessage,
   onClose,
@@ -38,7 +46,7 @@ export function AlunoFormDrawer({
       <div className={styles.header}>
         <div className={styles.titleGroup}>
           <SchoolOutlinedIcon className={styles.titleIcon} />
-          <h2>Adicionar aluno</h2>
+          <h2>{mode === "edit" ? "Editar aluno" : "Adicionar aluno"}</h2>
         </div>
         <IconButton aria-label="Fechar painel" onClick={onClose}>
           <ArrowForwardIcon />
@@ -46,12 +54,18 @@ export function AlunoFormDrawer({
       </div>
 
       <div className={styles.content}>
-        <AlunoForm
-          isSubmitting={isSubmitting}
-          errorMessage={errorMessage}
-          onCancel={onClose}
-          onSubmit={onSubmit}
-        />
+        {isLoading ? (
+          <p className={styles.loadingText}>Carregando aluno...</p>
+        ) : (
+          <AlunoForm
+            mode={mode}
+            initialValues={initialValues}
+            isSubmitting={isSubmitting}
+            errorMessage={errorMessage}
+            onCancel={onClose}
+            onSubmit={onSubmit}
+          />
+        )}
       </div>
     </Drawer>
   );

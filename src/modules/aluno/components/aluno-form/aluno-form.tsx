@@ -34,7 +34,12 @@ export interface AlunoFormSubmitValues {
   contatoApoioRelacao?: string;
 }
 
+export type AlunoFormMode = "create" | "edit";
+export type AlunoFormInitialValues = Partial<AlunoFormValues>;
+
 export interface AlunoFormProps {
+  mode?: AlunoFormMode;
+  initialValues?: AlunoFormInitialValues;
   isSubmitting?: boolean;
   errorMessage?: string;
   onCancel: () => void;
@@ -54,7 +59,16 @@ const defaultValues: AlunoFormValues = {
   contatoApoioRelacao: "",
 };
 
+function buildDefaultValues(initialValues?: AlunoFormInitialValues): AlunoFormValues {
+  return {
+    ...defaultValues,
+    ...initialValues,
+  };
+}
+
 export function AlunoForm({
+  mode = "create",
+  initialValues,
   isSubmitting = false,
   errorMessage,
   onCancel,
@@ -84,13 +98,13 @@ export function AlunoForm({
     formState: { errors },
   } = useForm<AlunoFormValues>({
     resolver: zodResolver(alunoFormSchema),
-    defaultValues,
+    defaultValues: buildDefaultValues(initialValues),
   });
   const selectedCourseId = useWatch({ control, name: "cursoId" });
 
   useEffect(() => {
-    reset(defaultValues);
-  }, [reset]);
+    reset(buildDefaultValues(initialValues));
+  }, [initialValues, reset]);
 
   const submitForm = handleSubmit(async (values) => {
     await onSubmit({
@@ -311,7 +325,11 @@ export function AlunoForm({
           Cancelar
         </Button>
         <Button variant="contained" type="submit" disabled={isSubmitting}>
-          {isSubmitting ? "Salvando..." : "Adicionar aluno"}
+          {isSubmitting
+            ? "Salvando..."
+            : mode === "edit"
+              ? "Salvar alterações"
+              : "Adicionar aluno"}
         </Button>
       </div>
     </form>

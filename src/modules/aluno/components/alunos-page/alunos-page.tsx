@@ -2,42 +2,43 @@
 
 import { useMemo, useState } from "react";
 import AddCircleOutlinedIcon from "@mui/icons-material/AddCircleOutlined";
-import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
-import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import CloudUploadOutlinedIcon from "@mui/icons-material/CloudUploadOutlined";
-import KeyboardDoubleArrowLeftIcon from "@mui/icons-material/KeyboardDoubleArrowLeft";
-import KeyboardDoubleArrowRightIcon from "@mui/icons-material/KeyboardDoubleArrowRight";
 import SearchOutlinedIcon from "@mui/icons-material/SearchOutlined";
 import {
   Button,
   FormControl,
-  IconButton,
   InputAdornment,
   InputLabel,
   MenuItem,
   Select,
   type SelectChangeEvent,
   TextField,
-  Tooltip,
 } from "@mui/material";
 import { toast } from "react-toastify";
+import { PaginationControls } from "@/shared/components/pagination-controls/pagination-controls";
+import type { PaginatedResponseMeta } from "@/shared/types/paginated-response-type";
 import { useCreateCourseEnrollment } from "../../hooks/use-create-course-enrollment";
 import { useCreateStudent } from "../../hooks/use-create-student";
+import { useCourseEnrollments } from "../../hooks/use-get-course-enrollments";
 import { useCourses } from "../../hooks/use-get-courses";
+import { useStudent } from "../../hooks/use-get-student";
+import { useUpdateCourseEnrollment } from "../../hooks/use-update-course-enrollment";
+import { useUpdateStudent } from "../../hooks/use-update-student";
 import type { Course } from "../../interfaces/course";
 import type { StudentListItem } from "../../interfaces/student";
 import type { StudentsListQueryApiDto } from "../../services/get-students-service";
 import { AlunoDetailsDrawer } from "../aluno-details-drawer/aluno-details-drawer";
 import { AlunoFormDrawer } from "../aluno-form-drawer/aluno-form-drawer";
-import type { AlunoFormSubmitValues } from "../aluno-form/aluno-form";
+import type {
+  AlunoFormInitialValues,
+  AlunoFormSubmitValues,
+} from "../aluno-form/aluno-form";
 import { AlunoImportDialog } from "../aluno-import-dialog/aluno-import-dialog";
-import {
-  AlunosTable,
-  type StudentsPaginationMeta,
-} from "../alunos-table/alunos-table";
+import { AlunosTable } from "../alunos-table/alunos-table";
 import styles from "./alunos-page.module.css";
 
 type StatusFilter = "todos" | "ativos" | "inativos";
+type FormMode = "create" | "edit";
 
 const pageSize = 10;
 
@@ -45,24 +46,45 @@ function getCourseById(courses: Course[], courseId: string) {
   return courses.find((course) => course.id === courseId);
 }
 
+function getDateInputValue(date?: string | null) {
+  if (!date) {
+    return "";
+  }
+
+  return date.slice(0, 10);
+}
+
 export function AlunosPage() {
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("todos");
   const [courseFilter, setCourseFilter] = useState("");
   const [page, setPage] = useState(1);
-  const [paginationMeta, setPaginationMeta] =
-    useState<StudentsPaginationMeta>();
+  const [paginationMeta, setPaginationMeta] = useState<PaginatedResponseMeta>();
   const [selectedAluno, setSelectedAluno] = useState<StudentListItem | null>(
     null,
   );
   const [isDetailsOpen, setIsDetailsOpen] = useState(false);
-  const [isFormOpen, setIsFormOpen] = useState(false);
+  const [formMode, setFormMode] = useState<FormMode | null>(null);
   const [formError, setFormError] = useState<string | undefined>();
   const [isImportOpen, setIsImportOpen] = useState(false);
   const [importFile, setImportFile] = useState<File | null>(null);
   const coursesQuery = useCourses();
   const createStudentMutation = useCreateStudent();
+  const updateStudentMutation = useUpdateStudent();
   const createCourseEnrollmentMutation = useCreateCourseEnrollment();
+  const updateCourseEnrollmentMutation = useUpdateCourseEnrollment();
+  const editStudentQuery = useStudent(
+    formMode === "edit" ? selectedAluno?.id : undefined,
+  );
+  const editCourseEnrollmentsQuery = useCourseEnrollments(
+    {
+      page: 1,
+      pageSize: 1,
+      ...(selectedAluno?.id ? { estudanteId: selectedAluno.id } : {}),
+      status: "ATIVA",
+    },
+    formMode === "edit" && Boolean(selectedAluno?.id),
+  );
 
   const courses = coursesQuery.data?.data ?? [];
   const filters = useMemo<StudentsListQueryApiDto>(
@@ -76,7 +98,49 @@ export function AlunosPage() {
     [courseFilter, page, statusFilter],
   );
   const isSubmitting =
-    createStudentMutation.isPending || createCourseEnrollmentMutation.isPending;
+    createStudentMutation.isPending ||
+    updateStudentMutation.isPending ||
+    createCourseEnrollmentMutation.isPending ||
+    updateCourseEnrollmentMutation.isPending;
+  const isFormLoading =
+    formMode === "edit" &&
+    (editStudentQuery.isLoading || editCourseEnrollmentsQuery.isLoading);
+  const activeCourseEnrollment = editCourseEnrollmentsQuery.data?.data[0];
+  const editInitialValues = useMemo<AlunoFormInitialValues | undefined>(() => {
+    if (formMode !== "edit" || !selectedAluno || !editStudentQuery.data) {
+      return undefined;
+    }
+
+    const details = editStudentQuery.data;
+    const telefonePreferencial =
+      details.contatosTelefonicos.find(
+        (contact) => contact.formaPreferencialContato,
+      ) ?? details.contatosTelefonicos[0];
+    const contatoApoio = details.contatosApoio[0];
+
+    return {
+      nome: details.pessoaInstitucional.nome,
+      nomeSocial: details.pessoaInstitucional.nomeSocial ?? "",
+      emailInstitucional: details.pessoaInstitucional.emailInstitucional,
+      matricula:
+        activeCourseEnrollment?.matricula ??
+        selectedAluno.cursoAtual?.matricula ??
+        details.pessoaInstitucional.matricula,
+      dataNascimento: getDateInputValue(details.dataNascimento),
+      cursoId:
+        activeCourseEnrollment?.curso.id ?? selectedAluno.cursoAtual?.id ?? "",
+      telefone: telefonePreferencial?.telefone ?? "",
+      contatoApoioNome: contatoApoio?.nome ?? "",
+      contatoApoioTelefone: contatoApoio?.telefone ?? "",
+      contatoApoioRelacao: contatoApoio?.relacao ?? "",
+    };
+  }, [
+    activeCourseEnrollment?.curso.id,
+    activeCourseEnrollment?.matricula,
+    editStudentQuery.data,
+    formMode,
+    selectedAluno,
+  ]);
   const totalPages = Math.max(paginationMeta?.totalPages ?? 1, 1);
 
   const handleStatusChange = (event: SelectChangeEvent) => {
@@ -90,17 +154,18 @@ export function AlunosPage() {
   };
 
   const openCreateForm = () => {
+    setSelectedAluno(null);
     setFormError(undefined);
-    setIsFormOpen(true);
+    setFormMode("create");
   };
 
-  const closeCreateForm = () => {
+  const closeForm = () => {
     if (isSubmitting) {
       return;
     }
 
     setFormError(undefined);
-    setIsFormOpen(false);
+    setFormMode(null);
   };
 
   const openDetails = (aluno: StudentListItem) => {
@@ -110,6 +175,13 @@ export function AlunosPage() {
 
   const closeDetails = () => {
     setIsDetailsOpen(false);
+  };
+
+  const openEditForm = (aluno: StudentListItem) => {
+    setSelectedAluno(aluno);
+    setIsDetailsOpen(false);
+    setFormError(undefined);
+    setFormMode("edit");
   };
 
   const handleSubmitAluno = async (values: AlunoFormSubmitValues) => {
@@ -122,29 +194,76 @@ export function AlunosPage() {
       return;
     }
 
+    const contatosTelefonicos = values.telefone
+      ? [
+          {
+            telefone: values.telefone,
+            formaPreferencialContato: true,
+            descricao: "WhatsApp",
+          },
+        ]
+      : [];
+    const hasSupportContact =
+      values.contatoApoioNome &&
+      values.contatoApoioTelefone &&
+      values.contatoApoioRelacao;
+    const contatosApoio = hasSupportContact
+      ? [
+          {
+            nome: values.contatoApoioNome!,
+            telefone: values.contatoApoioTelefone!,
+            relacao: values.contatoApoioRelacao!,
+          },
+        ]
+      : [];
+
     try {
-      const contatosTelefonicos = values.telefone
-        ? [
-            {
-              telefone: values.telefone,
-              formaPreferencialContato: true,
-              descricao: "WhatsApp",
+      if (formMode === "edit") {
+        if (!selectedAluno) {
+          setFormError("Selecione um aluno para editar.");
+          return;
+        }
+
+        await updateStudentMutation.mutateAsync({
+          id: selectedAluno.id,
+          data: {
+            nome: values.nome,
+            nomeSocial: values.nomeSocial ?? "",
+            emailInstitucional: values.emailInstitucional,
+            matricula: values.matricula,
+            ...(values.dataNascimento
+              ? { dataNascimento: values.dataNascimento }
+              : {}),
+            unidadeAcademicaId: course.unidadeAcademica.id,
+            contatosTelefonicos,
+            contatosApoio,
+          },
+        });
+
+        if (activeCourseEnrollment) {
+          await updateCourseEnrollmentMutation.mutateAsync({
+            id: activeCourseEnrollment.id,
+            data: {
+              cursoId: values.cursoId,
+              matricula: values.matricula,
+              status: "ATIVA",
             },
-          ]
-        : undefined;
-      const hasSupportContact =
-        values.contatoApoioNome &&
-        values.contatoApoioTelefone &&
-        values.contatoApoioRelacao;
-      const contatosApoio = hasSupportContact
-        ? [
-            {
-              nome: values.contatoApoioNome!,
-              telefone: values.contatoApoioTelefone!,
-              relacao: values.contatoApoioRelacao!,
-            },
-          ]
-        : undefined;
+          });
+        } else {
+          await createCourseEnrollmentMutation.mutateAsync({
+            estudanteId: selectedAluno.id,
+            cursoId: values.cursoId,
+            matricula: values.matricula,
+            matriculadoEm: new Date().toISOString(),
+            status: "ATIVA",
+          });
+        }
+
+        toast.success("Aluno atualizado com sucesso.");
+        setFormMode(null);
+        setSelectedAluno(null);
+        return;
+      }
 
       const student = await createStudentMutation.mutateAsync({
         nome: values.nome,
@@ -155,8 +274,8 @@ export function AlunosPage() {
           ? { dataNascimento: values.dataNascimento }
           : {}),
         unidadeAcademicaId: course.unidadeAcademica.id,
-        ...(contatosTelefonicos ? { contatosTelefonicos } : {}),
-        ...(contatosApoio ? { contatosApoio } : {}),
+        ...(contatosTelefonicos.length ? { contatosTelefonicos } : {}),
+        ...(contatosApoio.length ? { contatosApoio } : {}),
       });
 
       await createCourseEnrollmentMutation.mutateAsync({
@@ -168,12 +287,12 @@ export function AlunosPage() {
       });
 
       toast.success("Aluno adicionado com sucesso.");
-      setIsFormOpen(false);
+      setFormMode(null);
     } catch (error) {
       setFormError(
         error instanceof Error
           ? error.message
-          : "Não foi possível adicionar o aluno.",
+          : "Não foi possível salvar o aluno.",
       );
     }
   };
@@ -267,81 +386,36 @@ export function AlunosPage() {
         </div>
       </div>
 
-      <div className={styles.paginationBar}>
-        <Tooltip title="Primeira página">
-          <span>
-            <IconButton
-              className={styles.pageButton}
-              disabled={page <= 1}
-              onClick={() => setPage(1)}
-              size="small"
-            >
-              <KeyboardDoubleArrowLeftIcon fontSize="small" />
-            </IconButton>
-          </span>
-        </Tooltip>
-        <Tooltip title="Página anterior">
-          <span>
-            <IconButton
-              className={styles.pageButton}
-              disabled={page <= 1}
-              onClick={() => setPage((currentPage) => Math.max(1, currentPage - 1))}
-              size="small"
-            >
-              <ChevronLeftIcon fontSize="small" />
-            </IconButton>
-          </span>
-        </Tooltip>
-        <span className={styles.pageInfo}>
-          {page} de {totalPages}
-        </span>
-        <Tooltip title="Próxima página">
-          <span>
-            <IconButton
-              className={styles.pageButton}
-              disabled={page >= totalPages}
-              onClick={() =>
-                setPage((currentPage) => Math.min(totalPages, currentPage + 1))
-              }
-              size="small"
-            >
-              <ChevronRightIcon fontSize="small" />
-            </IconButton>
-          </span>
-        </Tooltip>
-        <Tooltip title="Última página">
-          <span>
-            <IconButton
-              className={styles.pageButton}
-              disabled={page >= totalPages}
-              onClick={() => setPage(totalPages)}
-              size="small"
-            >
-              <KeyboardDoubleArrowRightIcon fontSize="small" />
-            </IconButton>
-          </span>
-        </Tooltip>
-      </div>
+      <PaginationControls
+        page={page}
+        totalPages={totalPages}
+        onPageChange={setPage}
+      />
 
       <AlunosTable
         filters={filters}
         searchTerm={searchTerm}
         onMetaChange={setPaginationMeta}
         onViewAluno={openDetails}
-        onEditAluno={openDetails}
+        onEditAluno={openEditForm}
       />
 
       <AlunoDetailsDrawer
+        key={selectedAluno?.id ?? "empty"}
         open={isDetailsOpen}
         aluno={selectedAluno}
         onClose={closeDetails}
+        onEdit={openEditForm}
       />
 
       <AlunoFormDrawer
-        open={isFormOpen}
+        open={Boolean(formMode)}
+        mode={formMode ?? "create"}
+        initialValues={editInitialValues}
+        isLoading={isFormLoading}
         isSubmitting={isSubmitting}
         errorMessage={formError}
-        onClose={closeCreateForm}
+        onClose={closeForm}
         onSubmit={handleSubmitAluno}
       />
 

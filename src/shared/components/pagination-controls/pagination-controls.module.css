@@ -1,0 +1,33 @@
+.paginationBar {
+  align-items: center;
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+}
+
+.pageButton {
+  border: 1px solid #7aa68e !important;
+  border-radius: 4px !important;
+  color: #1f6f4a !important;
+  height: 32px;
+  width: 36px;
+}
+
+.pageButton:disabled {
+  border-color: #b8c9c0 !important;
+  color: #9aae9f !important;
+}
+
+.pageInfo {
+  color: #1f6f4a;
+  font-size: 13px;
+  font-weight: 800;
+  min-width: 66px;
+  text-align: center;
+}
+
+@media (max-width: 1080px) {
+  .paginationBar {
+    justify-content: center;
+  }
+}

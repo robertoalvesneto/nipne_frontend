@@ -17,6 +17,8 @@ import {
 import { toast } from "react-toastify";
 import { useProfessores } from "@/modules/professor/hooks/use-get-professores";
 import type { Professor } from "@/modules/professor/interfaces/professor";
+import { PaginationControls } from "@/shared/components/pagination-controls/pagination-controls";
+import type { PaginatedResponseMeta } from "@/shared/types/paginated-response-type";
 import { normalizeText } from "@/shared/utils/normalize-text";
 import { useCreateClassGroupProfessor } from "../../hooks/use-create-class-group-professor";
 import { useCreateClassGroup } from "../../hooks/use-create-class-group";
@@ -41,6 +43,8 @@ import styles from "./disciplinas-page.module.css";
 
 type StatusFilter = "todos" | "ativos" | "inativos";
 type FormMode = "create" | "edit";
+
+const pageSize = 10;
 
 interface CsvRow {
   nome: string;
@@ -313,6 +317,8 @@ export function DisciplinasPage() {
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("todos");
   const [courseFilter, setCourseFilter] = useState("");
   const [periodFilter, setPeriodFilter] = useState("");
+  const [page, setPage] = useState(1);
+  const [paginationMeta, setPaginationMeta] = useState<PaginatedResponseMeta>();
   const [selectedDisciplina, setSelectedDisciplina] =
     useState<DisciplinaOferta | null>(null);
   const [isDetailsOpen, setIsDetailsOpen] = useState(false);
@@ -340,19 +346,20 @@ export function DisciplinasPage() {
 
   const filters = useMemo<ClassGroupsListQueryApiDto>(
     () => ({
-      page: 1,
-      pageSize: 10,
+      page,
+      pageSize,
       ...(courseFilter ? { cursoId: courseFilter } : {}),
       ...(periodFilter ? { periodoLetivoId: periodFilter } : {}),
       ...(statusFilter === "ativos" ? { ativo: true } : {}),
       ...(statusFilter === "inativos" ? { ativo: false } : {}),
     }),
-    [courseFilter, periodFilter, statusFilter],
+    [courseFilter, page, periodFilter, statusFilter],
   );
 
   const courses = coursesQuery.data?.data ?? [];
   const periods = periodsQuery.data?.data ?? [];
   const professors = professorsQuery.data?.data ?? [];
+  const totalPages = Math.max(paginationMeta?.totalPages ?? 1, 1);
   const isSubmitting =
     createDisciplinaMutation.isPending ||
     updateDisciplinaMutation.isPending ||
@@ -363,14 +370,17 @@ export function DisciplinasPage() {
     deleteClassGroupProfessorMutation.isPending;
 
   const handleStatusChange = (event: SelectChangeEvent) => {
+    setPage(1);
     setStatusFilter(event.target.value as StatusFilter);
   };
 
   const handleCourseChange = (event: SelectChangeEvent) => {
+    setPage(1);
     setCourseFilter(event.target.value);
   };
 
   const handlePeriodChange = (event: SelectChangeEvent) => {
+    setPage(1);
     setPeriodFilter(event.target.value);
   };
 
@@ -690,9 +700,16 @@ export function DisciplinasPage() {
         </div>
       </div>
 
+      <PaginationControls
+        page={page}
+        totalPages={totalPages}
+        onPageChange={setPage}
+      />
+
       <DisciplinasTable
         filters={filters}
         searchTerm={searchTerm}
+        onMetaChange={setPaginationMeta}
         onViewDisciplina={openDetails}
         onEditDisciplina={openEditForm}
       />

@@ -38,6 +38,12 @@
   padding-top: 28px;
 }
 
+.loadingText {
+  color: #57645e;
+  font-size: 14px;
+  font-weight: 700;
+}
+
 @media (max-width: 640px) {
   .drawer {
     padding: 24px 18px;

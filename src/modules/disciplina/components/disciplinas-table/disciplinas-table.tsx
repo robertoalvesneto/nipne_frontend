@@ -1,10 +1,11 @@
 "use client";
 
-import type { ReactNode } from "react";
+import { useEffect, type ReactNode } from "react";
 import EditOutlinedIcon from "@mui/icons-material/EditOutlined";
 import VisibilityOutlinedIcon from "@mui/icons-material/VisibilityOutlined";
 import { IconButton, Tooltip } from "@mui/material";
 import { Table, type TableColumn } from "@/shared/components/table/table";
+import type { PaginatedResponseMeta } from "@/shared/types/paginated-response-type";
 import { normalizeText } from "@/shared/utils/normalize-text";
 import { useClassGroups } from "../../hooks/use-get-class-groups";
 import type { DisciplinaOferta } from "../../interfaces/disciplina-oferta";
@@ -17,6 +18,7 @@ export interface DisciplinasTableProps {
   actionLabel?: ReactNode;
   renderAction?: (disciplina: DisciplinaOferta) => ReactNode;
   onActionClick?: (disciplina: DisciplinaOferta) => void;
+  onMetaChange?: (meta?: PaginatedResponseMeta) => void;
   onViewDisciplina?: (disciplina: DisciplinaOferta) => void;
   onEditDisciplina?: (disciplina: DisciplinaOferta) => void;
 }
@@ -122,12 +124,18 @@ export function DisciplinasTable({
   actionLabel = "Ver",
   renderAction,
   onActionClick,
+  onMetaChange,
   onViewDisciplina,
   onEditDisciplina,
 }: DisciplinasTableProps) {
   const disciplinasQuery = useClassGroups(filters);
   const disciplinas = disciplinasQuery.data?.data ?? [];
   const normalizedSearchTerm = normalizeText(searchTerm);
+
+  useEffect(() => {
+    onMetaChange?.(disciplinasQuery.data?.meta);
+  }, [onMetaChange, disciplinasQuery.data?.meta]);
+
   const rows: DisciplinaTableRow[] = disciplinas
     .filter((disciplina) => {
       if (!normalizedSearchTerm) {

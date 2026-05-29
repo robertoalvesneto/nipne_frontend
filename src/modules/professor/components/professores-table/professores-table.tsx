@@ -1,10 +1,11 @@
 "use client";
 
-import type { ReactNode } from "react";
+import { useEffect, type ReactNode } from "react";
 import EditOutlinedIcon from "@mui/icons-material/EditOutlined";
 import VisibilityOutlinedIcon from "@mui/icons-material/VisibilityOutlined";
 import { IconButton, Tooltip } from "@mui/material";
 import { Table, type TableColumn } from "@/shared/components/table/table";
+import type { PaginatedResponseMeta } from "@/shared/types/paginated-response-type";
 import { formatDatePtBr } from "@/shared/utils/format-date";
 import { normalizeText } from "@/shared/utils/normalize-text";
 import { useProfessores } from "../../hooks/use-get-professores";
@@ -18,6 +19,7 @@ export interface ProfessoresTableProps {
   actionLabel?: ReactNode;
   renderAction?: (professor: Professor) => ReactNode;
   onActionClick?: (professor: Professor) => void;
+  onMetaChange?: (meta?: PaginatedResponseMeta) => void;
   onViewProfessor?: (professor: Professor) => void;
   onEditProfessor?: (professor: Professor) => void;
 }
@@ -118,12 +120,18 @@ export function ProfessoresTable({
   actionLabel = "Ver",
   renderAction,
   onActionClick,
+  onMetaChange,
   onViewProfessor,
   onEditProfessor,
 }: ProfessoresTableProps) {
   const professoresQuery = useProfessores(filters);
   const professores = professoresQuery.data?.data ?? [];
   const normalizedSearchTerm = normalizeText(searchTerm);
+
+  useEffect(() => {
+    onMetaChange?.(professoresQuery.data?.meta);
+  }, [onMetaChange, professoresQuery.data?.meta]);
+
   const rows: ProfessorTableRow[] = professores
     .filter((professor) => {
       if (!normalizedSearchTerm) {

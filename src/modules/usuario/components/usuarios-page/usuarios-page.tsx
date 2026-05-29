@@ -14,6 +14,8 @@ import {
   TextField,
 } from "@mui/material";
 import { toast } from "react-toastify";
+import { PaginationControls } from "@/shared/components/pagination-controls/pagination-controls";
+import type { PaginatedResponseMeta } from "@/shared/types/paginated-response-type";
 import { perfilUsuarioOptions } from "../../constants/perfil-usuario-options";
 import { useCreateUser } from "../../hooks/use-create-usuario";
 import { useUpdateUser } from "../../hooks/use-update-usuario";
@@ -26,9 +28,13 @@ import type { UsuarioFormSubmitValues } from "../usuario-form/usuario-form";
 import { UsuariosTable } from "../usuarios-table/usuarios-table";
 import styles from "./usuarios-page.module.css";
 
+const pageSize = 10;
+
 export function UsuariosPage() {
   const [searchTerm, setSearchTerm] = useState("");
   const [profileFilter, setProfileFilter] = useState<PerfilUsuario | "">("");
+  const [page, setPage] = useState(1);
+  const [paginationMeta, setPaginationMeta] = useState<PaginatedResponseMeta>();
   const [selectedUsuario, setSelectedUsuario] = useState<Usuario | null>(null);
   const [isDetailsOpen, setIsDetailsOpen] = useState(false);
   const [formMode, setFormMode] = useState<"create" | "edit" | null>(null);
@@ -38,17 +44,19 @@ export function UsuariosPage() {
 
   const filters = useMemo<UsuariosListQueryApiDto>(
     () => ({
-      page: 1,
-      pageSize: 10,
+      page,
+      pageSize,
       ...(profileFilter ? { profile: profileFilter } : {}),
     }),
-    [profileFilter],
+    [page, profileFilter],
   );
+  const totalPages = Math.max(paginationMeta?.totalPages ?? 1, 1);
 
   const isSubmitting =
     createUserMutation.isPending || updateUserMutation.isPending;
 
   const handleProfileChange = (event: SelectChangeEvent) => {
+    setPage(1);
     setProfileFilter(event.target.value as PerfilUsuario | "");
   };
 
@@ -173,9 +181,16 @@ export function UsuariosPage() {
         </Button>
       </div>
 
+      <PaginationControls
+        page={page}
+        totalPages={totalPages}
+        onPageChange={setPage}
+      />
+
       <UsuariosTable
         filters={filters}
         searchTerm={searchTerm}
+        onMetaChange={setPaginationMeta}
         onViewUsuario={openDetails}
         onEditUsuario={openEditForm}
       />

@@ -1,10 +1,11 @@
 "use client";
 
-import type { ReactNode } from "react";
+import { useEffect, type ReactNode } from "react";
 import EditOutlinedIcon from "@mui/icons-material/EditOutlined";
 import VisibilityOutlinedIcon from "@mui/icons-material/VisibilityOutlined";
 import { IconButton, Tooltip } from "@mui/material";
 import { Table, type TableColumn } from "@/shared/components/table/table";
+import type { PaginatedResponseMeta } from "@/shared/types/paginated-response-type";
 import { formatDatePtBr } from "@/shared/utils/format-date";
 import { normalizeText } from "@/shared/utils/normalize-text";
 import { useUsers } from "../../hooks/use-get-usuarios";
@@ -20,6 +21,7 @@ export interface UsuariosTableProps {
   actionLabel?: ReactNode;
   renderAction?: (usuario: Usuario) => ReactNode;
   onActionClick?: (usuario: Usuario) => void;
+  onMetaChange?: (meta?: PaginatedResponseMeta) => void;
   onViewUsuario?: (usuario: Usuario) => void;
   onEditUsuario?: (usuario: Usuario) => void;
 }
@@ -103,12 +105,18 @@ export function UsuariosTable({
   actionLabel = "Ver",
   renderAction,
   onActionClick,
+  onMetaChange,
   onViewUsuario,
   onEditUsuario,
 }: UsuariosTableProps) {
   const usuariosQuery = useUsers(filters);
   const usuarios = usuariosQuery.data?.data ?? [];
   const normalizedSearchTerm = normalizeText(searchTerm);
+
+  useEffect(() => {
+    onMetaChange?.(usuariosQuery.data?.meta);
+  }, [onMetaChange, usuariosQuery.data?.meta]);
+
   const rows: UsuarioTableRow[] = usuarios
     .filter((usuario) => {
       if (!normalizedSearchTerm) {

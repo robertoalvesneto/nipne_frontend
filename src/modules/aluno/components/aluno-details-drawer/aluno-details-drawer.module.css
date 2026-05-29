@@ -44,6 +44,17 @@
   font-size: 42px !important;
 }
 
+.headerActions {
+  align-items: center;
+  display: flex;
+  flex: 0 0 auto;
+  gap: 8px;
+}
+
+.headerActions button {
+  border-radius: 6px !important;
+}
+
 .tabs {
   display: flex;
   padding-top: 20px;
@@ -115,6 +126,94 @@
   margin: 0;
 }
 
+.disciplinesSection {
+  border-top: 1px solid #d9e2dd;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding-top: 18px;
+}
+
+.sectionHeader {
+  align-items: center;
+  display: flex;
+  gap: 12px;
+  justify-content: space-between;
+}
+
+.sectionHeader strong {
+  color: #2f2f2f;
+  font-weight: 800;
+}
+
+.sectionHeader span {
+  color: #64748b;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.addDisciplineRow {
+  align-items: center;
+  display: flex;
+  gap: 10px;
+}
+
+.disciplineSelect {
+  flex: 1 1 auto;
+  min-width: 0 !important;
+}
+
+.addDisciplineRow button {
+  border-radius: 6px !important;
+  flex: 0 0 auto;
+  min-height: 40px;
+}
+
+.disciplineList {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.disciplineItem {
+  align-items: center;
+  background: #fbfbfb;
+  border: 1px solid #e2ebe6;
+  border-radius: 6px;
+  display: flex;
+  gap: 12px;
+  justify-content: space-between;
+  padding: 12px 14px;
+}
+
+.disciplineItem div {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+}
+
+.disciplineItem strong {
+  color: #2f2f2f;
+  font-weight: 800;
+  overflow-wrap: anywhere;
+}
+
+.disciplineItem span,
+.disciplineItem small,
+.emptyText {
+  color: #64748b;
+}
+
+.disciplineItem span,
+.disciplineItem small {
+  overflow-wrap: anywhere;
+}
+
+.emptyText {
+  margin: 0;
+}
+
 @media (max-width: 640px) {
   .panel {
     padding: 24px 18px;
@@ -126,5 +225,15 @@
 
   .detailsGrid {
     grid-template-columns: 1fr;
+  }
+
+  .header {
+    align-items: flex-start;
+  }
+
+  .headerActions,
+  .addDisciplineRow {
+    align-items: stretch;
+    flex-direction: column;
   }
 }

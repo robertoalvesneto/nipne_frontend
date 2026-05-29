@@ -5,25 +5,18 @@ import VisibilityOutlinedIcon from "@mui/icons-material/VisibilityOutlined";
 import { IconButton, Tooltip } from "@mui/material";
 import { useEffect, type ReactNode } from "react";
 import { Table, type TableColumn } from "@/shared/components/table/table";
+import type { PaginatedResponseMeta } from "@/shared/types/paginated-response-type";
 import { normalizeText } from "@/shared/utils/normalize-text";
 import { useStudents } from "../../hooks/use-get-students";
 import type { StudentListItem } from "../../interfaces/student";
 import type { StudentsListQueryApiDto } from "../../services/get-students-service";
 import styles from "./alunos-table.module.css";
 
-export interface StudentsPaginationMeta {
-  page: number;
-  pageSize: number;
-  totalItems: number;
-  totalPages: number;
-  hasNextPage: boolean;
-}
-
 export interface AlunosTableProps {
   filters?: StudentsListQueryApiDto;
   searchTerm?: string;
   actionLabel?: ReactNode;
-  onMetaChange?: (meta?: StudentsPaginationMeta) => void;
+  onMetaChange?: (meta?: PaginatedResponseMeta) => void;
   onViewAluno?: (aluno: StudentListItem) => void;
   onEditAluno?: (aluno: StudentListItem) => void;
 }

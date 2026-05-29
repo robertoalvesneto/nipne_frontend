@@ -14,6 +14,8 @@ import {
   TextField,
 } from "@mui/material";
 import { toast } from "react-toastify";
+import { PaginationControls } from "@/shared/components/pagination-controls/pagination-controls";
+import type { PaginatedResponseMeta } from "@/shared/types/paginated-response-type";
 import { useAcademicUnits } from "../../hooks/use-get-academic-units";
 import { useCreateProfessor } from "../../hooks/use-create-professor";
 import { useUpdateProfessor } from "../../hooks/use-update-professor";
@@ -28,10 +30,14 @@ import styles from "./professores-page.module.css";
 
 type StatusFilter = "todos" | "ativos" | "inativos";
 
+const pageSize = 10;
+
 export function ProfessoresPage() {
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("todos");
   const [unitFilter, setUnitFilter] = useState("");
+  const [page, setPage] = useState(1);
+  const [paginationMeta, setPaginationMeta] = useState<PaginatedResponseMeta>();
   const [selectedProfessor, setSelectedProfessor] = useState<Professor | null>(
     null,
   );
@@ -45,14 +51,15 @@ export function ProfessoresPage() {
 
   const filters = useMemo<ProfessoresListQueryApiDto>(
     () => ({
-      page: 1,
-      pageSize: 10,
+      page,
+      pageSize,
       ...(unitFilter ? { unidadeAcademicaId: unitFilter } : {}),
       ...(statusFilter === "ativos" ? { ativo: true } : {}),
       ...(statusFilter === "inativos" ? { ativo: false } : {}),
     }),
-    [statusFilter, unitFilter],
+    [page, statusFilter, unitFilter],
   );
+  const totalPages = Math.max(paginationMeta?.totalPages ?? 1, 1);
 
   const isSubmitting =
     createProfessorMutation.isPending ||
@@ -60,10 +67,12 @@ export function ProfessoresPage() {
     updateProfessorStatusMutation.isPending;
 
   const handleStatusChange = (event: SelectChangeEvent) => {
+    setPage(1);
     setStatusFilter(event.target.value as StatusFilter);
   };
 
   const handleUnitChange = (event: SelectChangeEvent) => {
+    setPage(1);
     setUnitFilter(event.target.value);
   };
 
@@ -211,9 +220,16 @@ export function ProfessoresPage() {
         </Button>
       </div>
 
+      <PaginationControls
+        page={page}
+        totalPages={totalPages}
+        onPageChange={setPage}
+      />
+
       <ProfessoresTable
         filters={filters}
         searchTerm={searchTerm}
+        onMetaChange={setPaginationMeta}
         onViewProfessor={openDetails}
         onEditProfessor={openEditForm}
       />

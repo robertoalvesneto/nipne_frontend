@@ -1,6 +1,18 @@
 import { api } from "@/shared/services/api";
 import type { Student } from "../interfaces/student";
 
+export interface CreatePhoneContactBodyApiDto {
+  telefone: string;
+  formaPreferencialContato: boolean;
+  descricao?: string;
+}
+
+export interface CreateSupportContactBodyApiDto {
+  nome: string;
+  telefone: string;
+  relacao: string;
+}
+
 export interface CreateStudentBodyApiDto {
   nome: string;
   nomeSocial?: string;
@@ -8,16 +20,8 @@ export interface CreateStudentBodyApiDto {
   matricula: string;
   dataNascimento?: string;
   unidadeAcademicaId: string;
-  contatosTelefonicos?: Array<{
-    telefone: string;
-    formaPreferencialContato: boolean;
-    descricao?: string;
-  }>;
-  contatosApoio?: Array<{
-    nome: string;
-    telefone: string;
-    relacao: string;
-  }>;
+  contatosTelefonicos?: CreatePhoneContactBodyApiDto[];
+  contatosApoio?: CreateSupportContactBodyApiDto[];
 }
 
 export type CreateStudentResponseApiDto = Student;

@@ -125,6 +125,10 @@ type StatusMatriculaCurso =
 | `GET` | `/api/v1/class-group-professors` | Lista vinculos professor-turma |
 | `GET` | `/api/v1/class-group-professors/:id` | Busca vinculo professor-turma |
 | `DELETE` | `/api/v1/class-group-professors/:id` | Remove vinculo professor-turma |
+| `POST` | `/api/v1/class-group-students` | Vincula estudante a turma |
+| `GET` | `/api/v1/class-group-students` | Lista vinculos estudante-turma |
+| `GET` | `/api/v1/class-group-students/:id` | Busca vinculo estudante-turma |
+| `DELETE` | `/api/v1/class-group-students/:id` | Remove vinculo estudante-turma |
 
 ## Tipos de resposta compartilhados
 
@@ -976,6 +980,74 @@ Resposta:
 
 ```ts
 type ClassGroupProfessorDeleteResponse = DeleteResponse;
+```
+
+## Vinculos estudante-turma
+
+Response:
+
+```ts
+type ClassGroupStudent = {
+  id: string;
+  createdAt: string;
+  estudante: {
+    id: string;
+    ativo: boolean;
+    pessoaInstitucional: InstitutionalPerson;
+  };
+  turma: ClassGroup;
+};
+```
+
+### `POST /api/v1/class-group-students`
+
+Status esperado: `201`.
+
+Body:
+
+```ts
+type CreateClassGroupStudentBody = {
+  estudanteId: string; // UUID
+  turmaId: string; // UUID
+};
+```
+
+Regras adicionais:
+
+- Nao vincula estudante inativo.
+- Nao vincula estudante a turma inativa.
+- A turma precisa pertencer a um curso em que o estudante tenha matricula ativa.
+- O mesmo estudante nao pode ser vinculado duas vezes a mesma turma.
+
+Resposta: `ClassGroupStudent`.
+
+### `GET /api/v1/class-group-students`
+
+Query:
+
+```ts
+type ClassGroupStudentListQuery = {
+  page?: number;
+  pageSize?: number;
+  estudanteId?: string; // UUID
+  turmaId?: string; // UUID
+  cursoId?: string; // UUID
+  periodoLetivoId?: string; // UUID
+};
+```
+
+Resposta: `PaginatedResponse<ClassGroupStudent>`.
+
+### `GET /api/v1/class-group-students/:id`
+
+Resposta: `ClassGroupStudent`.
+
+### `DELETE /api/v1/class-group-students/:id`
+
+Resposta:
+
+```ts
+type ClassGroupStudentDeleteResponse = DeleteResponse;
 ```
 
 ## Observacoes de frontend

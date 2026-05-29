@@ -11,9 +11,13 @@ export const classGroupsQueryKey = (
   query: ClassGroupsListQueryApiDto = {},
 ) => [...CLASS_GROUPS_QUERY_KEY, query] as const;
 
-export const useClassGroups = (query: ClassGroupsListQueryApiDto = {}) => {
+export const useClassGroups = (
+  query: ClassGroupsListQueryApiDto = {},
+  enabled = true,
+) => {
   return useQuery<ClassGroupsListResponseApiDto, Error>({
     queryKey: classGroupsQueryKey(query),
+    enabled,
     queryFn: async () => {
       const response = await getClassGroupsApi(query);
       return response;
