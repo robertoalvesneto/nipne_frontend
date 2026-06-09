@@ -11,6 +11,7 @@ export interface JwtPayload {
   UnidadeAcademicaNome: string;
   UnidadeAcademicaSigla: string;
   UnidadeAcademicaCategoria: CategoriaUnidadeAcademica;
+  UnidadeAcademicaVinculada?: boolean;
   nome: string;
   nomeSocial?: string | null;
   emailInstitucional: string;

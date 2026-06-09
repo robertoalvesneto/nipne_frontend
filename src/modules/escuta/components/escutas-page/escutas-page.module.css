@@ -1,0 +1,574 @@
+.page {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  min-height: 0;
+}
+
+.filters {
+  align-items: center;
+  display: flex;
+  gap: 12px;
+  justify-content: space-between;
+  width: 100%;
+}
+
+.filterGroup {
+  align-items: center;
+  display: flex;
+  flex: 1 1 auto;
+  gap: 12px;
+  min-width: 0;
+}
+
+.searchField {
+  max-width: 330px;
+  width: 100%;
+}
+
+.statusField {
+  min-width: 180px !important;
+}
+
+.statusBadge {
+  border-radius: 999px;
+  display: inline-flex;
+  font-weight: 700;
+  justify-content: center;
+  min-width: 104px;
+  padding: 8px 12px;
+}
+
+.statusSOLICITADA {
+  background: #d9ad00;
+  color: #ffffff;
+}
+
+.statusAGENDADA {
+  background: #eef7f1;
+  color: #2f2f2f;
+}
+
+.statusREALIZADA {
+  background: #dceee3;
+  color: #1f6f4a;
+}
+
+.statusCANCELADA {
+  background: #f3e3e3;
+  color: #9f2d2d;
+}
+
+.rowActions {
+  align-items: center;
+  display: inline-flex;
+  gap: 4px;
+}
+
+.scheduleTitle {
+  align-items: center;
+  border-bottom: 2px solid #1f6f4a;
+  color: #1f6f4a;
+  display: flex;
+  gap: 14px;
+  justify-content: center;
+  padding: 20px 24px !important;
+}
+
+.scheduleTitle svg {
+  font-size: 38px;
+}
+
+.scheduleContent {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  padding-top: 22px !important;
+  text-align: center;
+}
+
+.scheduleContent strong {
+  color: #a34545;
+}
+
+.scheduleFields {
+  display: grid;
+  gap: 18px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  margin: 0 auto;
+  max-width: 560px;
+  width: 100%;
+}
+
+.scheduleActions {
+  justify-content: space-between !important;
+  padding: 20px 24px !important;
+}
+
+.scheduleActions button,
+.drawerActions button {
+  border-radius: 6px;
+  min-width: 150px;
+}
+
+.drawer {
+  width: min(820px, 100vw);
+}
+
+.detailsDrawer {
+  width: min(920px, 100vw);
+}
+
+.detailsPanel {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  min-height: 100%;
+  padding: 32px;
+}
+
+.detailsHeader {
+  align-items: center;
+  display: flex;
+  gap: 16px;
+  justify-content: space-between;
+  padding-bottom: 18px;
+}
+
+.detailsTitle {
+  align-items: center;
+  display: flex;
+  gap: 12px;
+  min-width: 0;
+}
+
+.detailsTitle svg {
+  color: #3f3f46;
+  flex: 0 0 auto;
+  font-size: 42px;
+}
+
+.detailsTitle h2 {
+  font-size: 1.55rem;
+  line-height: 1.25;
+  margin: 0;
+}
+
+.detailsTitle span {
+  color: #8f8f96;
+}
+
+.detailsTabs {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: repeat(3, minmax(120px, 1fr));
+  max-width: 520px;
+}
+
+.detailsTabs button {
+  background: transparent;
+  border: 0;
+  border-bottom: 1px solid transparent;
+  color: #aac5b6;
+  cursor: pointer;
+  font: inherit;
+  font-weight: 800;
+  padding: 10px 0;
+}
+
+.detailsTabs .activeTab {
+  border-color: #1f6f4a;
+  color: #1f6f4a;
+}
+
+.scheduleSummary {
+  border: 1px solid #1f6f4a;
+  border-radius: 8px;
+  display: grid;
+  gap: 12px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  padding: 14px;
+}
+
+.scheduleSummary .detailField:first-child {
+  grid-column: 1 / -1;
+}
+
+.statusSection,
+.disciplinesSection,
+.paaiPanel {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.paaiHeader {
+  align-items: center;
+  display: flex;
+  gap: 16px;
+  justify-content: space-between;
+}
+
+.paaiHeader h3 {
+  color: #2f2f2f;
+  font-size: 1.05rem;
+  margin: 0;
+}
+
+.paaiHeader span {
+  border: 1px solid #1f6f4a;
+  border-radius: 999px;
+  color: #1f6f4a;
+  font-weight: 800;
+  padding: 6px 12px;
+}
+
+.paaiGuidanceGrid {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.paaiGuidanceGrid div,
+.readonlySection {
+  background: #fdfdfd;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 12px;
+}
+
+.paaiGuidanceGrid strong,
+.readonlySection h3,
+.readonlySection h4 {
+  color: #1f6f4a;
+  font-size: 0.95rem;
+  margin: 0;
+}
+
+.paaiGuidanceGrid p,
+.readonlySection p {
+  color: #3f3f46;
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
+.statusSection strong,
+.sectionHeading h3 {
+  color: #2f2f2f;
+  font-size: 0.95rem;
+  margin: 0;
+}
+
+.studentStatus {
+  align-items: center;
+  background: #fdfdfd;
+  display: flex;
+  gap: 6px;
+  min-height: 48px;
+  padding: 8px 12px;
+}
+
+.studentStatus :global(.MuiSwitch-switchBase.Mui-checked) {
+  color: #13b51a;
+}
+
+.studentStatus :global(.MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track) {
+  background-color: #13b51a;
+}
+
+.detailGrid {
+  display: grid;
+  gap: 16px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  margin: 0;
+}
+
+.detailField {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+}
+
+.detailField dt {
+  color: #2f2f2f;
+  font-size: 0.9rem;
+  font-weight: 800;
+}
+
+.detailField dd {
+  align-items: center;
+  background: #fdfdfd;
+  color: #3f3f46;
+  display: flex;
+  min-height: 48px;
+  margin: 0;
+  overflow-wrap: anywhere;
+  padding: 8px 12px;
+}
+
+.sectionHeading {
+  align-items: center;
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.sectionHeading strong {
+  color: #1f6f4a;
+  font-size: 0.95rem;
+}
+
+.disciplinesTable {
+  padding-bottom: 10px;
+}
+
+.disciplinesTable :global(table) {
+  min-width: 0;
+}
+
+.disciplinesTable :global(td) {
+  height: 34px;
+}
+
+.detailsActions {
+  display: flex;
+  gap: 14px;
+  justify-content: flex-end;
+  margin-top: auto;
+  padding-top: 18px;
+}
+
+.detailsActions button {
+  border-radius: 6px;
+  min-width: 160px;
+}
+
+.drawerPanel {
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+  min-height: 100%;
+  padding: 32px;
+}
+
+.drawerHeader {
+  align-items: center;
+  display: flex;
+  gap: 12px;
+  padding-bottom: 18px;
+}
+
+.drawerHeader svg {
+  color: #3f3f46;
+  font-size: 42px;
+}
+
+.drawerHeader h2 {
+  font-size: 1.55rem;
+  line-height: 1.25;
+  margin: 0;
+}
+
+.drawerHeader span {
+  color: #8f8f96;
+}
+
+.drawerTabs {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.drawerTabs span {
+  border-bottom: 1px solid transparent;
+  color: #aac5b6;
+  font-weight: 700;
+  padding: 10px 0;
+  text-align: center;
+}
+
+.drawerTabs .activeTab {
+  border-color: #1f6f4a;
+  color: #1f6f4a;
+}
+
+.questionSection {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.questionSection h3 {
+  font-size: 1.25rem;
+  margin: 0;
+}
+
+.dynamicQuestion {
+  gap: 8px;
+}
+
+.dynamicQuestion > span {
+  color: #1f6f4a;
+  font-weight: 800;
+}
+
+.questionOptions {
+  display: grid;
+  gap: 8px 14px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.readonlyAnswers {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.readonlyList {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin: 0;
+}
+
+.readonlyAnswer {
+  border-bottom: 1px solid #d6e4dc;
+  display: grid;
+  gap: 8px;
+  grid-template-columns: minmax(180px, 0.8fr) minmax(0, 1.2fr);
+  padding-bottom: 10px;
+}
+
+.readonlyAnswer:last-child {
+  border-bottom: 0;
+  padding-bottom: 0;
+}
+
+.readonlyAnswer dt {
+  color: #2f2f2f;
+  font-weight: 800;
+}
+
+.readonlyAnswer dd {
+  color: #3f3f46;
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
+.loadingState {
+  align-items: center;
+  background: #fdfdfd;
+  color: #3f3f46;
+  display: flex;
+  min-height: 96px;
+  padding: 16px;
+}
+
+.confirmTitle {
+  align-items: center;
+  border-bottom: 2px solid #1f6f4a;
+  color: #1f6f4a;
+  display: flex;
+  gap: 14px;
+  justify-content: center;
+  padding: 20px 24px !important;
+}
+
+.confirmTitle svg {
+  font-size: 38px;
+}
+
+.confirmContent {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding-top: 22px !important;
+  text-align: center;
+}
+
+.confirmContent strong {
+  color: #a34545;
+}
+
+.formGrid {
+  display: grid;
+  gap: 14px 16px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.radioGroup {
+  gap: 4px;
+}
+
+.radioGroup > span,
+.checkboxGroup > span {
+  color: #1f6f4a;
+  font-weight: 700;
+}
+
+.radioGroup :global(.MuiFormGroup-root),
+.checkboxGroup {
+  align-items: center;
+  display: grid;
+  gap: 12px;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.checkboxGroup > span {
+  grid-column: 1 / -1;
+}
+
+.drawerActions {
+  display: flex;
+  justify-content: space-between;
+  margin-top: auto;
+  padding-top: 16px;
+}
+
+@media (max-width: 900px) {
+  .filters,
+  .filterGroup {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .searchField,
+  .statusField {
+    max-width: none;
+    min-width: 0 !important;
+    width: 100%;
+  }
+
+  .scheduleFields,
+  .formGrid,
+  .scheduleSummary,
+  .detailGrid,
+  .paaiGuidanceGrid,
+  .questionOptions,
+  .readonlyAnswer,
+  .radioGroup :global(.MuiFormGroup-root),
+  .checkboxGroup {
+    grid-template-columns: 1fr;
+  }
+
+  .detailsPanel {
+    padding: 22px;
+  }
+
+  .detailsHeader,
+  .sectionHeading,
+  .detailsActions {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .detailsActions button {
+    width: 100%;
+  }
+
+  .drawerPanel {
+    padding: 22px;
+  }
+}

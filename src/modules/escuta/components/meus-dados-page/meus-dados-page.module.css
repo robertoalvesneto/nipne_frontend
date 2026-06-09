@@ -1,0 +1,437 @@
+.page {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  min-height: 100%;
+}
+
+.statusCard {
+  align-items: center;
+  border: 1px solid #14b814;
+  border-radius: 8px;
+  box-shadow: 0 0 10px rgba(20, 184, 20, 0.34);
+  display: grid;
+  gap: 20px;
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  padding: 12px 16px;
+}
+
+.statusCard h2 {
+  font-size: 1.3rem;
+  margin: 0 0 10px;
+}
+
+.statusCard p {
+  color: #3f3f46;
+  margin: 0 0 14px;
+}
+
+.statusCard button,
+.drawerActions button {
+  border-radius: 6px;
+  min-width: 150px;
+}
+
+.statusActions {
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+}
+
+.steps {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  list-style: none;
+  margin: 0;
+  padding: 0 0 0 14px;
+  position: relative;
+}
+
+.steps::before {
+  background: #d7e5dc;
+  bottom: 9px;
+  content: "";
+  left: 4px;
+  position: absolute;
+  top: 9px;
+  width: 2px;
+}
+
+.steps li {
+  color: #3f3f46;
+  position: relative;
+}
+
+.steps li::before {
+  background: #d7e5dc;
+  border-radius: 50%;
+  content: "";
+  height: 12px;
+  left: -16px;
+  position: absolute;
+  top: 3px;
+  width: 12px;
+}
+
+.steps .doneStep::before {
+  background: #14b814;
+}
+
+.scheduleBox {
+  display: grid;
+  gap: 4px 14px;
+  grid-template-columns: auto auto;
+}
+
+.scheduleBox span {
+  color: #1f6f4a;
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+
+.scheduleBox strong {
+  align-items: center;
+  display: inline-flex;
+  gap: 6px;
+  white-space: nowrap;
+}
+
+.details {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.details h2 {
+  font-size: 1.22rem;
+  margin: 8px 0 0;
+}
+
+.tabs {
+  align-items: center;
+  display: flex;
+  gap: 36px;
+  min-height: 42px;
+}
+
+.tabs span {
+  color: #9ab8a7;
+  font-weight: 700;
+  min-width: 150px;
+  padding: 10px 0;
+  text-align: center;
+}
+
+.tabs .activeTab {
+  border-bottom: 1px solid #1f6f4a;
+  color: #1f6f4a;
+}
+
+.detailGrid {
+  display: grid;
+  gap: 14px 20px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  margin: 0;
+}
+
+.detailGrid div {
+  min-width: 0;
+}
+
+.detailGrid dt {
+  color: #1f6f4a;
+  font-weight: 700;
+  margin-bottom: 6px;
+}
+
+.detailGrid dd {
+  background: #fbfbfb;
+  min-height: 44px;
+  margin: 0;
+  padding: 12px 16px;
+}
+
+.disciplineHeader {
+  align-items: center;
+  display: flex;
+  justify-content: space-between;
+  margin-top: 4px;
+}
+
+.disciplineHeader h3 {
+  font-size: 1rem;
+  margin: 0;
+}
+
+.disciplineHeader span {
+  color: #1f6f4a;
+  font-weight: 700;
+}
+
+.disciplineTable {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.addDisciplineRow {
+  align-items: center;
+  display: flex;
+  gap: 10px;
+}
+
+.disciplineSelect {
+  flex: 1 1 auto;
+  min-width: 0 !important;
+}
+
+.addDisciplineRow button {
+  border-radius: 6px !important;
+  flex: 0 0 auto;
+  min-height: 40px;
+}
+
+.disciplineRowHeader,
+.disciplineRow {
+  display: grid;
+  gap: 16px;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  min-height: 34px;
+  padding: 8px 10px;
+}
+
+.disciplineRowHeader {
+  background: #d4e3db;
+  border-radius: 6px;
+  font-weight: 700;
+}
+
+.disciplineRow {
+  border-bottom: 1px solid #cadbd2;
+}
+
+.drawerDisciplineRowHeader,
+.drawerDisciplineRow {
+  align-items: center;
+  display: grid;
+  gap: 12px;
+  grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr) 104px 44px;
+  min-height: 38px;
+  padding: 8px 10px;
+}
+
+.drawerDisciplineRowHeader {
+  background: #d4e3db;
+  border-radius: 6px;
+  font-weight: 700;
+}
+
+.drawerDisciplineRow {
+  border-bottom: 1px solid #cadbd2;
+}
+
+.drawerDisciplineRow span {
+  overflow-wrap: anywhere;
+}
+
+.emptyText {
+  color: #71717a;
+  margin: 12px 0;
+}
+
+.emptyState {
+  align-items: center;
+  color: #3f3f46;
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  justify-content: center;
+  min-height: 360px;
+  text-align: center;
+}
+
+.emptyState svg {
+  color: #1f6f4a;
+  font-size: 120px;
+  opacity: 0.18;
+}
+
+.drawer {
+  width: min(820px, 100vw);
+}
+
+.drawerPanel {
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+  min-height: 100%;
+  padding: 32px;
+}
+
+.drawerHeader {
+  align-items: center;
+  border-bottom: 1px solid #2f2f2f;
+  display: flex;
+  gap: 12px;
+  padding-bottom: 18px;
+}
+
+.drawerHeader svg {
+  color: #3f3f46;
+  font-size: 42px;
+}
+
+.drawerHeader h2 {
+  font-size: 1.7rem;
+  margin: 0;
+}
+
+.progressLine {
+  align-items: center;
+  display: flex;
+  gap: 0;
+  justify-content: center;
+}
+
+.progressLine::before {
+  background: #14b814;
+  content: "";
+  height: 3px;
+  position: absolute;
+  width: 150px;
+}
+
+.progressLine span {
+  background: #14b814;
+  border-radius: 50%;
+  height: 14px;
+  margin: 0 42px;
+  position: relative;
+  width: 14px;
+  z-index: 1;
+}
+
+.formSection {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.formSection h3 {
+  font-size: 1.25rem;
+  margin: 0;
+}
+
+.formGrid {
+  display: grid;
+  gap: 14px 16px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.radioGroup {
+  gap: 4px;
+}
+
+.radioGroup > span {
+  color: #1f6f4a;
+  font-weight: 700;
+}
+
+.specialOfferField {
+  max-width: 360px;
+}
+
+.loadingText {
+  color: #64748b;
+  margin: 0;
+}
+
+.questionario {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.questionario h3,
+.questionario p,
+.questionarioSection h4 {
+  margin: 0;
+}
+
+.questionario p {
+  color: #64748b;
+  margin-top: 6px;
+}
+
+.questionarioSection {
+  border-top: 1px solid #d9e2dd;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding-top: 18px;
+}
+
+.questionarioSection h4 {
+  color: #1f6f4a;
+  font-size: 1rem;
+}
+
+.questionField {
+  gap: 4px;
+}
+
+.questionField legend {
+  color: #2f2f2f;
+  font-size: 0.95rem;
+  font-weight: 700;
+  line-height: 1.4;
+}
+
+.checkboxGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.drawerActions {
+  display: flex;
+  justify-content: space-between;
+  margin-top: auto;
+  padding-top: 16px;
+}
+
+@media (max-width: 900px) {
+  .statusCard {
+    align-items: stretch;
+    grid-template-columns: 1fr;
+  }
+
+  .detailGrid,
+  .formGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .addDisciplineRow {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .drawerDisciplineRowHeader {
+    display: none;
+  }
+
+  .drawerDisciplineRow {
+    align-items: stretch;
+    grid-template-columns: 1fr auto;
+  }
+
+  .drawerDisciplineRow span:nth-child(2),
+  .drawerDisciplineRow span:nth-child(3) {
+    grid-column: 1 / -1;
+  }
+
+  .drawerPanel {
+    padding: 22px;
+  }
+}

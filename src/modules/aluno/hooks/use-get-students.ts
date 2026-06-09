@@ -10,9 +10,10 @@ export const STUDENTS_QUERY_KEY = ["students"] as const;
 export const studentsQueryKey = (query: StudentsListQueryApiDto = {}) =>
   [...STUDENTS_QUERY_KEY, query] as const;
 
-export const useStudents = (query: StudentsListQueryApiDto = {}) => {
+export const useStudents = (query: StudentsListQueryApiDto = {}, enabled = true) => {
   return useQuery<StudentsListResponseApiDto, Error>({
     queryKey: studentsQueryKey(query),
+    enabled,
     queryFn: async () => {
       const response = await getStudentsApi(query);
       return response;

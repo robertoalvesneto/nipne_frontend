@@ -66,6 +66,12 @@ type StatusMatriculaCurso =
   | 'CONCLUIDA'
   | 'ENCERRADA'
   | 'TRANCADA';
+
+type StatusEscuta =
+  | 'SOLICITADA'
+  | 'AGENDADA'
+  | 'REALIZADA'
+  | 'CANCELADA';
 ```
 
 ## Resumo rapido
@@ -129,6 +135,14 @@ type StatusMatriculaCurso =
 | `GET` | `/api/v1/class-group-students` | Lista vinculos estudante-turma |
 | `GET` | `/api/v1/class-group-students/:id` | Busca vinculo estudante-turma |
 | `DELETE` | `/api/v1/class-group-students/:id` | Remove vinculo estudante-turma |
+| `GET` | `/api/v1/questionarios/cadastro-aluno` | Busca questionario versionado do cadastro inicial do aluno |
+| `POST` | `/api/v1/escutas` | Solicita escuta inicial |
+| `GET` | `/api/v1/escutas` | Lista escutas |
+| `GET` | `/api/v1/escutas/:id` | Busca escuta |
+| `PATCH` | `/api/v1/escutas/:id/cadastro` | Atualiza dados iniciais da escuta |
+| `PATCH` | `/api/v1/escutas/:id/agendar` | Agenda escuta |
+| `PATCH` | `/api/v1/escutas/:id/questionario` | Finaliza questionario da escuta |
+| `PATCH` | `/api/v1/escutas/:id/cancelar` | Cancela escuta |
 
 ## Tipos de resposta compartilhados
 
@@ -400,6 +414,7 @@ type StudentListItem = {
   id: string;
   ativo: boolean;
   dataNascimento?: string | null;
+  cadastroInicialFinalizadoEm?: string | null;
   createdAt: string;
   updatedAt: string;
   pessoaInstitucional: InstitutionalPerson;
@@ -411,6 +426,16 @@ type Student = {
   id: string;
   dataNascimento?: string | null;
   ativo: boolean;
+  cadastroInicialFinalizadoEm?: string | null;
+  telefoneWhatsapp?: string | null;
+  emailPessoal?: string | null;
+  outroContato?: string | null;
+  formaPreferencialContato?: string | null;
+  modalidadeCurso?: string | null;
+  ofertaCurso?: string | null;
+  questionarioCadastroId?: string | null;
+  questionarioCadastroVersao?: string | null;
+  respostasQuestionarioCadastro?: Record<string, unknown> | null;
   createdAt: string;
   updatedAt: string;
   pessoaInstitucional: InstitutionalPerson;
@@ -434,6 +459,16 @@ type CreateStudentBody = {
   emailInstitucional: string; // email, max 254
   matricula: string; // max 50
   dataNascimento?: string; // data ISO ou YYYY-MM-DD
+  telefoneWhatsapp?: string; // max 20
+  emailPessoal?: string; // max 254
+  outroContato?: string; // max 100
+  formaPreferencialContato?: string; // max 50
+  modalidadeCurso?: string; // max 80
+  ofertaCurso?: string; // max 80
+  questionarioCadastroId?: string; // max 100
+  questionarioCadastroVersao?: string; // max 30
+  respostasQuestionarioCadastro?: Record<string, unknown>;
+  finalizarCadastroInicial?: boolean;
   unidadeAcademicaId: string; // UUID
   contatosTelefonicos?: {
     telefone: string; // max 20
@@ -457,6 +492,7 @@ Regras adicionais:
 - Maximo de 1 telefone preferencial.
 - Maximo de 1 e-mail preferencial.
 - `emailInstitucional` e `matricula` devem ser unicos.
+- Quando `finalizarCadastroInicial=true`, `questionarioCadastroId`, `questionarioCadastroVersao` e `respostasQuestionarioCadastro` sao obrigatorios e validados contra a definicao atual do questionario.
 
 Resposta: `Student`.
 
@@ -1049,6 +1085,185 @@ Resposta:
 ```ts
 type ClassGroupStudentDeleteResponse = DeleteResponse;
 ```
+
+## Questionario de cadastro inicial do aluno
+
+O frontend deve buscar a definicao do questionario no backend. Assim, textos, opcoes e perguntas condicionais podem ser alterados por versao sem recompilar a interface.
+
+```ts
+type QuestionarioCadastroAluno = {
+  id: string;
+  versao: string;
+  titulo: string;
+  secoes: {
+    id: string;
+    titulo: string;
+    perguntas: {
+      id: string;
+      numero: number;
+      titulo: string;
+      tipo:
+        | 'texto'
+        | 'texto_longo'
+        | 'data'
+        | 'selecao_unica'
+        | 'selecao_multipla'
+        | 'disciplinas';
+      origem: 'cadastro' | 'questionario' | 'disciplinas';
+      obrigatoria: boolean;
+      opcoes?: { valor: string; rotulo: string }[];
+      permiteOutro?: boolean;
+      ajuda?: string;
+      condicao?: {
+        perguntaId: string;
+        operador: 'igual' | 'contem' | 'contem_algum';
+        valor: unknown;
+      };
+    }[];
+  }[];
+};
+```
+
+### `GET /api/v1/questionarios/cadastro-aluno`
+
+Resposta: `QuestionarioCadastroAluno`.
+
+## Escutas
+
+Response:
+
+```ts
+type Escuta = {
+  id: string;
+  status: StatusEscuta;
+  telefoneWhatsapp?: string | null;
+  emailPessoal?: string | null;
+  outroContato?: string | null;
+  formaPreferencialContato?: string | null;
+  modalidadeCurso?: string | null;
+  ofertaCurso?: string | null;
+  consentimento: boolean;
+  questionarioCadastroId?: string | null;
+  questionarioCadastroVersao?: string | null;
+  respostasQuestionarioCadastro?: Record<string, unknown> | null;
+  agendadaPara?: string | null;
+  agendadaEm?: string | null;
+  realizadaEm?: string | null;
+  canceladaEm?: string | null;
+  temTutor?: boolean | null;
+  nomeTutor?: string | null;
+  telefoneTutor?: string | null;
+  resumoCaso?: string | null;
+  classificacaoApoio?: string | null;
+  necessitaPaai?: string | null;
+  encaminhamentos: string[];
+  outrosEncaminhamentos?: string | null;
+  createdAt: string;
+  updatedAt: string;
+  estudante: {
+    id: string;
+    ativo: boolean;
+    pessoaInstitucional: InstitutionalPerson;
+    unidadeAcademica: AcademicUnit;
+    cursoAtual: {
+      id: string;
+      nome: string;
+      sigla: string;
+      matricula: string;
+    } | null;
+  };
+};
+```
+
+### `POST /api/v1/escutas`
+
+Status esperado: `201`.
+
+Body:
+
+```ts
+type CreateEscutaBody = {
+  estudanteId: string; // UUID
+  consentimento?: boolean;
+};
+```
+
+Regras adicionais:
+
+- Nao cria escuta para estudante inativo.
+- O cadastro inicial do estudante precisa estar finalizado antes da solicitacao.
+- A escuta copia um snapshot dos dados e respostas do cadastro inicial do estudante.
+- Um estudante nao pode ter mais de uma escuta em aberto (`SOLICITADA` ou `AGENDADA`).
+- Escutas `REALIZADA` ou `CANCELADA` preservam historico e permitem nova solicitacao futura.
+- Quando `consentimento` nao e informado, a API assume `true`.
+
+Resposta: `Escuta`.
+
+### `GET /api/v1/escutas`
+
+Query:
+
+```ts
+type EscutaListQuery = {
+  page?: number;
+  pageSize?: number;
+  status?: StatusEscuta;
+  estudanteId?: string; // UUID
+  unidadeAcademicaId?: string; // UUID
+  nome?: string; // max 150
+};
+```
+
+Resposta: `PaginatedResponse<Escuta>`.
+
+### `GET /api/v1/escutas/:id`
+
+Resposta: `Escuta`.
+
+### `PATCH /api/v1/escutas/:id/cadastro`
+
+Body parcial:
+
+```ts
+type UpdateEscutaCadastroBody = Partial<CreateEscutaBody>;
+```
+
+Resposta: `Escuta`.
+
+### `PATCH /api/v1/escutas/:id/agendar`
+
+Body:
+
+```ts
+type ScheduleEscutaBody = {
+  agendadaPara: string; // data ISO
+};
+```
+
+Resposta: `Escuta`.
+
+### `PATCH /api/v1/escutas/:id/questionario`
+
+Body:
+
+```ts
+type FinishEscutaQuestionarioBody = {
+  temTutor?: boolean;
+  nomeTutor?: string;
+  telefoneTutor?: string;
+  resumoCaso?: string;
+  classificacaoApoio?: string;
+  necessitaPaai?: string;
+  encaminhamentos?: string[];
+  outrosEncaminhamentos?: string;
+};
+```
+
+Resposta: `Escuta`.
+
+### `PATCH /api/v1/escutas/:id/cancelar`
+
+Resposta: `Escuta`.
 
 ## Observacoes de frontend
 

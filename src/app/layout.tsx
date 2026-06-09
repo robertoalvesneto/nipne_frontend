@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { AppRouterCacheProvider } from "@mui/material-nextjs/v16-appRouter";
 import { Geist, Geist_Mono } from "next/font/google";
 import "react-toastify/dist/ReactToastify.css";
 import "./globals.css";
@@ -30,11 +31,13 @@ export default function RootLayout({
   return (
     <html lang="pt-BR" className={`${geistSans.variable} ${geistMono.variable}`}>
       <body>
-        <AppThemeProvider>
-          <QueryProvider>
-            <ToastProvider>{children}</ToastProvider>
-          </QueryProvider>
-        </AppThemeProvider>
+        <AppRouterCacheProvider>
+          <AppThemeProvider>
+            <QueryProvider>
+              <ToastProvider>{children}</ToastProvider>
+            </QueryProvider>
+          </AppThemeProvider>
+        </AppRouterCacheProvider>
       </body>
     </html>
   );

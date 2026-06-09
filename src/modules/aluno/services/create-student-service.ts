@@ -1,4 +1,5 @@
 import { api } from "@/shared/services/api";
+import type { RespostasQuestionarioCadastro } from "@/modules/escuta/interfaces/questionario-cadastro";
 import type { Student } from "../interfaces/student";
 
 export interface CreatePhoneContactBodyApiDto {
@@ -19,6 +20,16 @@ export interface CreateStudentBodyApiDto {
   emailInstitucional: string;
   matricula: string;
   dataNascimento?: string;
+  telefoneWhatsapp?: string;
+  emailPessoal?: string;
+  outroContato?: string;
+  formaPreferencialContato?: string;
+  modalidadeCurso?: string;
+  ofertaCurso?: string;
+  questionarioCadastroId?: string;
+  questionarioCadastroVersao?: string;
+  respostasQuestionarioCadastro?: RespostasQuestionarioCadastro;
+  finalizarCadastroInicial?: boolean;
   unidadeAcademicaId: string;
   contatosTelefonicos?: CreatePhoneContactBodyApiDto[];
   contatosApoio?: CreateSupportContactBodyApiDto[];

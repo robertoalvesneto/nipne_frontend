@@ -32,6 +32,12 @@ export const CoordenadorSidebarOptions: SidebarOptions = [
     path: "/auth/coordenador/disciplinas/",
     ariaLabel: "Disciplinas",
   },
+  {
+    name: "Professores",
+    icon: <SchoolOutlinedIcon />,
+    path: "/auth/coordenador/professores/",
+    ariaLabel: "Professores",
+  },
 ];
 
 export const CoordenadorSidebarSideOptions: SidebarOptions = [
