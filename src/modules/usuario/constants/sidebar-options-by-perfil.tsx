@@ -106,6 +106,15 @@ export const AlunoSidebarOptions: SidebarOptions = [
   },
 ];
 
+export const ProfessorSidebarOptions: SidebarOptions = [
+  {
+    name: "Meus Alunos",
+    icon: <SchoolOutlinedIcon />,
+    path: "/auth/professor/meus-alunos/",
+    ariaLabel: "Meus Alunos",
+  },
+];
+
 export const SidebarOptionsByPerfil: Record<
   PerfilUsuario,
   { main: SidebarOptions; side: SidebarOptions }
@@ -119,7 +128,7 @@ export const SidebarOptionsByPerfil: Record<
     side: [],
   },
   PROFESSOR: {
-    main: AlunoSidebarOptions,
+    main: ProfessorSidebarOptions,
     side: [],
   },
   COORDENADOR: {

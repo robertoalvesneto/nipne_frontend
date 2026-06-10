@@ -9,6 +9,7 @@ export interface ClassGroupStudentsListQueryApiDto {
   turmaId?: string;
   cursoId?: string;
   periodoLetivoId?: string;
+  professorId?: string;
 }
 
 export type ClassGroupStudentsListResponseApiDto =

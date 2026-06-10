@@ -12,5 +12,5 @@ export const permissoesByPerfil: Record<PerfilUsuario, string[]> = {
   COORDENADOR: ["Alunos", "Escutas", "Ocorrências", "Disciplinas", "Usuários"],
   BOLSISTA: ["Alunos", "Escutas", "Ocorrências", "Disciplinas"],
   ALUNO: ["Meus dados", "Minhas disciplinas", "Minhas ocorrências"],
-  PROFESSOR: ["Meus alunos", "Minhas disciplinas", "Ocorrências"],
+  PROFESSOR: ["Meus Alunos"],
 };

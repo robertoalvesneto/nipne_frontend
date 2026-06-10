@@ -8,6 +8,7 @@ export interface ClassGroupsListQueryApiDto {
   disciplinaId?: string;
   cursoId?: string;
   periodoLetivoId?: string;
+  professorId?: string;
   nome?: string;
   sigla?: string;
   ativo?: boolean;
