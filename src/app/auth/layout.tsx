@@ -57,7 +57,7 @@ export default async function AuthLayout({
         mainOptions={options.main}
         sideOptions={options.side}
         logoAlt="..."
-        logoSrc="/Logo.svg"
+        logoSrc="/logo.svg"
       />
       <div className={styles.content}>
         <div className={styles.contentHeader}>
