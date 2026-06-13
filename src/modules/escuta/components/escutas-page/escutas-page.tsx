@@ -1264,7 +1264,7 @@ export function EscutasPage() {
       page,
       pageSize,
       ...(statusFilter !== "TODAS" ? { status: statusFilter } : {}),
-      ...(searchTerm.trim() ? { nome: searchTerm.trim() } : {}),
+      ...(searchTerm.trim() ? { search: searchTerm.trim() } : {}),
       ...(unidadeAcademicaId ? { unidadeAcademicaId } : {}),
     }),
     [page, searchTerm, statusFilter, unidadeAcademicaId],
@@ -1377,7 +1377,7 @@ export function EscutasPage() {
               setPage(1);
               setSearchTerm(event.target.value);
             }}
-            placeholder="Nome do aluno"
+            placeholder="Nome, e-mail ou matrícula"
             size="small"
             value={searchTerm}
             slotProps={{

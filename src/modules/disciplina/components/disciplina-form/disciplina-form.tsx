@@ -132,19 +132,6 @@ function getProfessorNome(professor: Professor) {
   );
 }
 
-function getPeriodLabel(period: AcademicPeriod) {
-  const date = new Date(period.dataInicio);
-
-  if (Number.isNaN(date.getTime())) {
-    return period.nome;
-  }
-
-  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(
-    2,
-    "0",
-  )}`;
-}
-
 export function DisciplinaForm({
   mode,
   disciplina,
@@ -193,7 +180,7 @@ export function DisciplinaForm({
       new Map(
         periodOptions.map((period) => [
           period.id,
-          `${getPeriodLabel(period)} - ${period.nome}`,
+          `${period.nome} - ${period.nome}`,
         ]),
       ),
     [periodOptions],
@@ -397,7 +384,7 @@ export function DisciplinaForm({
                       })
                     }
                   >
-                    {getPeriodLabel(period)} - {period.nome}
+                    {period.nome}
                   </MenuItem>
                 ))}
               </Select>

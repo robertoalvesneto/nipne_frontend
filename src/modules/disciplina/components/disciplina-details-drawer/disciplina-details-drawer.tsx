@@ -27,19 +27,6 @@ function getProfessorText(disciplina: DisciplinaOferta) {
   );
 }
 
-function getPeriodoAnoMes(disciplina: DisciplinaOferta) {
-  const date = new Date(disciplina.periodoLetivo.dataInicio);
-
-  if (Number.isNaN(date.getTime())) {
-    return disciplina.periodoLetivo.nome;
-  }
-
-  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(
-    2,
-    "0",
-  )}`;
-}
-
 export function DisciplinaDetailsDrawer({
   open,
   disciplina,
@@ -104,7 +91,7 @@ export function DisciplinaDetailsDrawer({
               <div>
                 <dt>Período letivo</dt>
                 <dd>
-                  {getPeriodoAnoMes(disciplina)} - {disciplina.periodoLetivo.nome}
+                  {disciplina.periodoLetivo.nome}
                 </dd>
               </div>
               <div>

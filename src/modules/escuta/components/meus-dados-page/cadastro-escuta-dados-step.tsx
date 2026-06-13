@@ -18,20 +18,6 @@ import type { QuestionarioCadastro } from "../../interfaces/questionario-cadastr
 import type { CadastroValues } from "./cadastro-escuta-types";
 import styles from "./meus-dados-page.module.css";
 
-function getPeriodoAnoMes(dataInicio?: string | Date | null, fallback = "-") {
-  if (!dataInicio) {
-    return fallback;
-  }
-
-  const date = new Date(dataInicio);
-
-  if (Number.isNaN(date.getTime())) {
-    return fallback;
-  }
-
-  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}`;
-}
-
 function getProfessoresText(disciplina: DisciplinaOferta) {
   return (
     disciplina.professores

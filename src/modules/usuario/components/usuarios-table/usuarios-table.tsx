@@ -7,7 +7,6 @@ import { IconButton, Tooltip } from "@mui/material";
 import { Table, type TableColumn } from "@/shared/components/table/table";
 import type { PaginatedResponseMeta } from "@/shared/types/paginated-response-type";
 import { formatDatePtBr } from "@/shared/utils/format-date";
-import { normalizeText } from "@/shared/utils/normalize-text";
 import { useUsers } from "../../hooks/use-get-usuarios";
 import type { UsuariosListQueryApiDto } from "../../services/get-usuario-service";
 import styles from "./usuarios-table.module.css";
@@ -111,26 +110,15 @@ export function UsuariosTable({
 }: UsuariosTableProps) {
   const usuariosQuery = useUsers(filters);
   const usuarios = usuariosQuery.data?.data ?? [];
-  const normalizedSearchTerm = normalizeText(searchTerm);
 
   useEffect(() => {
     onMetaChange?.(usuariosQuery.data?.meta);
   }, [onMetaChange, usuariosQuery.data?.meta]);
 
-  const rows: UsuarioTableRow[] = usuarios
-    .filter((usuario) => {
-      if (!normalizedSearchTerm) {
-        return true;
-      }
-
-      return normalizeText(`${usuario.name} ${usuario.email}`).includes(
-        normalizedSearchTerm,
-      );
-    })
-    .map((usuario) => ({
-      ...usuario,
-      onUsuarioClick: onViewUsuario,
-    }));
+  const rows: UsuarioTableRow[] = usuarios.map((usuario) => ({
+    ...usuario,
+    onUsuarioClick: onViewUsuario,
+  }));
 
   return (
     <Table

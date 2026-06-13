@@ -7,7 +7,6 @@ import { IconButton, Tooltip } from "@mui/material";
 import { Table, type TableColumn } from "@/shared/components/table/table";
 import type { PaginatedResponseMeta } from "@/shared/types/paginated-response-type";
 import { formatDatePtBr } from "@/shared/utils/format-date";
-import { normalizeText } from "@/shared/utils/normalize-text";
 import { useProfessores } from "../../hooks/use-get-professores";
 import type { Professor } from "../../interfaces/professor";
 import type { ProfessoresListQueryApiDto } from "../../services/get-professores-service";
@@ -126,37 +125,15 @@ export function ProfessoresTable({
 }: ProfessoresTableProps) {
   const professoresQuery = useProfessores(filters);
   const professores = professoresQuery.data?.data ?? [];
-  const normalizedSearchTerm = normalizeText(searchTerm);
 
   useEffect(() => {
     onMetaChange?.(professoresQuery.data?.meta);
   }, [onMetaChange, professoresQuery.data?.meta]);
 
-  const rows: ProfessorTableRow[] = professores
-    .filter((professor) => {
-      if (!normalizedSearchTerm) {
-        return true;
-      }
-
-      const searchableText = [
-        professor.pessoaInstitucional.nome,
-        professor.pessoaInstitucional.nomeSocial,
-        professor.pessoaInstitucional.emailInstitucional,
-        professor.pessoaInstitucional.matricula,
-        ...professor.unidadesAcademicas.flatMap((unit) => [
-          unit.nome,
-          unit.sigla,
-        ]),
-      ]
-        .filter(Boolean)
-        .join(" ");
-
-      return normalizeText(searchableText).includes(normalizedSearchTerm);
-    })
-    .map((professor) => ({
-      ...professor,
-      onProfessorClick: onViewProfessor,
-    }));
+  const rows: ProfessorTableRow[] = professores.map((professor) => ({
+    ...professor,
+    onProfessorClick: onViewProfessor,
+  }));
 
   return (
     <Table

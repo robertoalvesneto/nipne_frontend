@@ -46,9 +46,10 @@ export function UsuariosPage() {
     () => ({
       page,
       pageSize,
+      ...(searchTerm ? { search: searchTerm } : {}),
       ...(profileFilter ? { profile: profileFilter } : {}),
     }),
-    [page, profileFilter],
+    [page, profileFilter, searchTerm],
   );
   const totalPages = Math.max(paginationMeta?.totalPages ?? 1, 1);
 
@@ -138,7 +139,10 @@ export function UsuariosPage() {
           <TextField
             className={styles.searchField}
             label="Buscar usuário"
-            onChange={(event) => setSearchTerm(event.target.value)}
+            onChange={(event) => {
+              setSearchTerm(event.target.value);
+              setPage(1);
+            }}
             placeholder="Nome ou e-mail"
             size="small"
             value={searchTerm}

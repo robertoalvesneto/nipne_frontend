@@ -40,23 +40,6 @@ function getAlunoNome(aluno: StudentListItem) {
   );
 }
 
-function getPeriodoAnoMes(dataInicio?: string | Date | null, fallback = "-") {
-  if (!dataInicio) {
-    return fallback;
-  }
-
-  const date = new Date(dataInicio);
-
-  if (Number.isNaN(date.getTime())) {
-    return fallback;
-  }
-
-  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(
-    2,
-    "0",
-  )}`;
-}
-
 function getProfessoresText(
   professores: Array<{
     pessoaInstitucional: {
@@ -359,10 +342,7 @@ export function AlunoDetailsDrawer({
                         <strong>{link.turma.disciplina.nome}</strong>
                         <span>
                           {link.turma.sigla} ·{" "}
-                          {getPeriodoAnoMes(
-                            link.turma.periodoLetivo.dataInicio,
-                            link.turma.periodoLetivo.nome,
-                          )}
+                          {link.turma.periodoLetivo.nome}
                         </span>
                         <small>{getProfessoresText(link.turma.professores)}</small>
                       </div>
