@@ -8,6 +8,7 @@ import {
   RadioGroup,
   TextField,
 } from "@mui/material";
+import { formatPhone } from "@/shared/utils/phone-mask";
 import type {
   CondicaoPerguntaQuestionario,
   PerguntaQuestionario,
@@ -52,6 +53,15 @@ function hasAnswer(answer: unknown) {
 
 function includesOther(answer: unknown) {
   return answer === "outro" || (Array.isArray(answer) && answer.includes("outro"));
+}
+
+function isPhoneQuestion(question: PerguntaQuestionario) {
+  const text = `${question.id} ${question.titulo}`
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase();
+
+  return text.includes("telefone") || text.includes("whatsapp");
 }
 
 export function isPerguntaVisible(
@@ -204,15 +214,34 @@ export function CadastroEscutaQuestionarioStep({
                 );
               }
 
+              const isPhone = isPhoneQuestion(question);
+              const textValue = typeof answer === "string" ? answer : "";
+
               return (
                 <TextField
                   key={question.id}
                   label={`${question.numero}. ${question.titulo}`}
-                  value={typeof answer === "string" ? answer : ""}
-                  onChange={(event) => onAnswerChange(question.id, event.target.value)}
+                  value={isPhone ? formatPhone(textValue) : textValue}
+                  onChange={(event) =>
+                    onAnswerChange(
+                      question.id,
+                      isPhone ? formatPhone(event.target.value) : event.target.value,
+                    )
+                  }
                   required={question.obrigatoria}
                   multiline={question.tipo === "texto_longo"}
                   minRows={question.tipo === "texto_longo" ? 4 : undefined}
+                  placeholder={isPhone ? "(92) 99999-9999" : undefined}
+                  slotProps={
+                    isPhone
+                      ? {
+                          htmlInput: {
+                            inputMode: "tel",
+                            maxLength: 15,
+                          },
+                        }
+                      : undefined
+                  }
                 />
               );
             })}

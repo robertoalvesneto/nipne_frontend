@@ -64,6 +64,11 @@ type QuestionnaireValues = {
   outrosEncaminhamentos: string;
 };
 
+type PaaiEditableValues = {
+  resumoCaso: string;
+  encaminhamentos: string[];
+};
+
 const pageSize = 10;
 
 const statusLabels = {
@@ -95,6 +100,16 @@ function getStudentName(escuta: Escuta) {
     escuta.estudante.pessoaInstitucional.nomeSocial?.trim() ||
     escuta.estudante.pessoaInstitucional.nome
   );
+}
+
+function isUuidLike(value: string) {
+  return /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(
+    value.trim(),
+  );
+}
+
+function getSafeRegistration(...values: Array<string | null | undefined>) {
+  return values.find((value) => value?.trim() && !isUuidLike(value))?.trim() || "-";
 }
 
 function getDateTimeParts(date?: string | null) {
@@ -327,10 +342,12 @@ function includesOther(answer: unknown) {
 function buildQuestionnaireInitialValues(
   escuta: Escuta,
   questionario: QuestionarioEscuta,
+  coordinatorName = "",
 ): RespostasQuestionarioEscuta {
   const initial: RespostasQuestionarioEscuta = {
     ...(escuta.respostasQuestionarioEscuta ?? {}),
   };
+  const responsibleName = coordinatorName.trim();
 
   for (const pergunta of getAllQuestions(questionario)) {
     if (initial[pergunta.id] !== undefined) {
@@ -338,6 +355,10 @@ function buildQuestionnaireInitialValues(
     }
 
     initial[pergunta.id] = pergunta.tipo === "selecao_multipla" ? [] : "";
+  }
+
+  if (responsibleName) {
+    initial.responsavel_escuta = responsibleName;
   }
 
   return initial;
@@ -357,6 +378,45 @@ function formatReadOnlyAnswer(
   }
 
   return getStringAnswer(respostas, pergunta.id) || "-";
+}
+
+function getReadOnlyAnswerItems(
+  questionario: QuestionarioEscuta,
+  pergunta: PerguntaQuestionario,
+  respostas: RespostasQuestionarioEscuta,
+) {
+  if (pergunta.tipo === "selecao_multipla") {
+    return getAnswerLabels(questionario, respostas, pergunta.id);
+  }
+
+  const answer = formatReadOnlyAnswer(questionario, pergunta, respostas);
+
+  return answer === "-"
+    ? []
+    : answer
+        .split(/\r?\n/)
+        .map((item) => item.trim())
+        .filter(Boolean);
+}
+
+function renderReadOnlyAnswer(
+  questionario: QuestionarioEscuta,
+  pergunta: PerguntaQuestionario,
+  respostas: RespostasQuestionarioEscuta,
+) {
+  const items = getReadOnlyAnswerItems(questionario, pergunta, respostas);
+
+  if (!items.length) {
+    return <span>-</span>;
+  }
+
+  return (
+    <ul className={styles.readonlyBulletList}>
+      {items.map((item) => (
+        <li key={item}>{item}</li>
+      ))}
+    </ul>
+  );
 }
 
 interface ScheduleDialogProps {
@@ -890,22 +950,27 @@ interface PaaiPreviewPanelProps {
   escuta: Escuta;
   questionarioEscuta: QuestionarioEscuta | null | undefined;
   disciplineLinks: ClassGroupStudent[];
+  isSaving: boolean;
+  onSave: (escuta: Escuta, values: PaaiEditableValues) => Promise<void>;
 }
 
 function PaaiPreviewPanel({
   escuta,
   questionarioEscuta,
   disciplineLinks,
+  isSaving,
+  onSave,
 }: PaaiPreviewPanelProps) {
   const respostas = escuta.respostasQuestionarioEscuta;
   const person = escuta.estudante.pessoaInstitucional;
   const studentName = getStudentName(escuta);
   const identificationName =
     getQuestionTextAnswerByNumber(questionarioEscuta, respostas, 1, ["nome"]) || studentName;
-  const identificationRegistration =
-    getQuestionTextAnswerByNumber(questionarioEscuta, respostas, 2, ["matricula"]) ||
-    escuta.estudante.cursoAtual?.matricula ||
-    person.matricula;
+  const identificationRegistration = getSafeRegistration(
+    getCadastroStringAnswer(escuta, "matricula_institucional"),
+    escuta.estudante.cursoAtual?.matricula,
+    person.matricula,
+  );
   const identificationCourse =
     getQuestionTextAnswerByNumber(questionarioEscuta, respostas, 3, ["curso"]) ||
     escuta.estudante.cursoAtual?.nome ||
@@ -951,12 +1016,25 @@ function PaaiPreviewPanel({
   const wantsTutor = getStringAnswer(respostas, "deseja_tutor") === "sim";
   const tutorName = getStringAnswer(respostas, "nome_tutor") || escuta.nomeTutor || "";
   const tutorPhone = getStringAnswer(respostas, "telefone_tutor") || escuta.telefoneTutor || "";
-  const summary = getStringAnswer(respostas, "resumo_caso") || escuta.resumoCaso || "";
-  const generatedReferrals = encaminhamentos.length ? encaminhamentos : escuta.encaminhamentos;
+  const summary = escuta.resumoCaso || getStringAnswer(respostas, "resumo_caso") || "";
+  const generatedReferrals = escuta.encaminhamentos.length ? escuta.encaminhamentos : encaminhamentos;
+  const generatedReferralText = generatedReferrals.join("\n");
   const accessibilityNeeds = buildAccessibilityNeeds(escuta);
   const sensoryNeeds = buildSensoryNeeds(escuta);
   const escutaDate = formatDatePtBr(escuta.realizadaEm ?? escuta.agendadaPara ?? escuta.createdAt);
   const responsible = getStringAnswer(respostas, "responsavel_escuta");
+  const [paaiSummary, setPaaiSummary] = useState(summary);
+  const [paaiReferrals, setPaaiReferrals] = useState(generatedReferralText);
+
+  const handleSavePaai = async () => {
+    await onSave(escuta, {
+      resumoCaso: paaiSummary,
+      encaminhamentos: paaiReferrals
+        .split(/\r?\n/)
+        .map((item) => item.trim())
+        .filter(Boolean),
+    });
+  };
 
   return (
     <section className={styles.paaiPanel} aria-label="Prévia do PAAI">
@@ -1103,11 +1181,11 @@ function PaaiPreviewPanel({
             <dt>Observações específicas do caso</dt>
             <dd>
               <TextField
-                value={summary}
+                value={paaiSummary}
+                onChange={(event) => setPaaiSummary(event.target.value)}
                 multiline
                 minRows={4}
                 fullWidth
-                slotProps={{ input: { readOnly: true } }}
               />
             </dd>
           </div>
@@ -1115,13 +1193,18 @@ function PaaiPreviewPanel({
             <dt>Encaminhamentos</dt>
             <dd>
               <TextField
-                value={generatedReferrals.join("\n")}
+                value={paaiReferrals}
+                onChange={(event) => setPaaiReferrals(event.target.value)}
                 multiline
                 minRows={4}
                 fullWidth
-                slotProps={{ input: { readOnly: true } }}
               />
             </dd>
+          </div>
+          <div className={styles.paaiActions}>
+            <Button variant="contained" onClick={handleSavePaai} disabled={isSaving}>
+              Salvar PAAI
+            </Button>
           </div>
         </div>
       </section>
@@ -1197,7 +1280,7 @@ function EscutaReadOnlyPanel({ escuta, questionarioEscuta, onEdit }: EscutaReadO
               {visibleQuestions.map((pergunta) => (
                 <div className={styles.readonlyAnswer} key={pergunta.id}>
                   <dt>{pergunta.titulo}</dt>
-                  <dd>{formatReadOnlyAnswer(questionarioEscuta, pergunta, respostas)}</dd>
+                  <dd>{renderReadOnlyAnswer(questionarioEscuta, pergunta, respostas)}</dd>
                 </div>
               ))}
             </dl>
@@ -1215,7 +1298,9 @@ interface EscutaDetailsDrawerProps {
   onClose: () => void;
   onExport: (escuta: Escuta) => void;
   onOpenQuestionnaire: (escuta: Escuta) => void;
+  onSavePaai: (escuta: Escuta, values: PaaiEditableValues) => Promise<void>;
   onSchedule: (escuta: Escuta) => void;
+  isSavingPaai: boolean;
 }
 
 function EscutaDetailsDrawer({
@@ -1225,7 +1310,9 @@ function EscutaDetailsDrawer({
   onClose,
   onExport,
   onOpenQuestionnaire,
+  onSavePaai,
   onSchedule,
+  isSavingPaai,
 }: EscutaDetailsDrawerProps) {
   const [activeTab, setActiveTab] = useState<DetailsTab>("gerais");
   const classGroupStudentsQuery = useClassGroupStudents(
@@ -1428,9 +1515,12 @@ function EscutaDetailsDrawer({
           </>
         ) : canShowPaai ? (
           <PaaiPreviewPanel
+            key={`${escuta.id}-${escuta.updatedAt}`}
             escuta={escuta}
             questionarioEscuta={questionarioEscuta}
             disciplineLinks={disciplineLinks}
+            isSaving={isSavingPaai}
+            onSave={onSavePaai}
           />
         ) : (
           <section className={styles.readonlySection}>
@@ -1640,6 +1730,7 @@ function LegacyQuestionnaireDrawer({
 interface QuestionnaireDrawerProps {
   escuta: Escuta | null;
   questionarioEscuta: QuestionarioEscuta | null | undefined;
+  coordinatorName: string;
   open: boolean;
   isLoading: boolean;
   isSubmitting: boolean;
@@ -1650,6 +1741,7 @@ interface QuestionnaireDrawerProps {
 function QuestionnaireDrawer({
   escuta,
   questionarioEscuta,
+  coordinatorName,
   open,
   isLoading,
   isSubmitting,
@@ -1657,7 +1749,9 @@ function QuestionnaireDrawer({
   onSubmit,
 }: QuestionnaireDrawerProps) {
   const [values, setValues] = useState<RespostasQuestionarioEscuta>(() =>
-    escuta && questionarioEscuta ? buildQuestionnaireInitialValues(escuta, questionarioEscuta) : {},
+    escuta && questionarioEscuta
+      ? buildQuestionnaireInitialValues(escuta, questionarioEscuta, coordinatorName)
+      : {},
   );
   const [confirmOpen, setConfirmOpen] = useState(false);
 
@@ -1665,14 +1759,21 @@ function QuestionnaireDrawer({
     return null;
   }
 
+  const responsibleName = coordinatorName.trim();
+  const valuesWithResponsible = responsibleName
+    ? {
+        ...values,
+        responsavel_escuta: responsibleName,
+      }
+    : values;
   const isEditing = escuta.status === "REALIZADA";
   const visibleQuestions = getAllQuestions(questionarioEscuta).filter((pergunta) =>
-    matchesQuestionCondition(pergunta, values),
+    matchesQuestionCondition(pergunta, valuesWithResponsible),
   );
   const canSubmit =
     Boolean(questionarioEscuta) &&
     visibleQuestions.every((pergunta) => {
-      const answer = values[pergunta.id];
+      const answer = valuesWithResponsible[pergunta.id];
 
       if (pergunta.obrigatoria && !hasQuestionAnswer(answer)) {
         return false;
@@ -1681,7 +1782,7 @@ function QuestionnaireDrawer({
       return !(
         pergunta.permiteOutro &&
         includesOther(answer) &&
-        !hasQuestionAnswer(values[`${pergunta.id}_outro`])
+        !hasQuestionAnswer(valuesWithResponsible[`${pergunta.id}_outro`])
       );
     });
 
@@ -1738,13 +1839,13 @@ function QuestionnaireDrawer({
     await onSubmit({
       questionarioEscutaId: questionarioEscuta.id,
       questionarioEscutaVersao: questionarioEscuta.versao,
-      respostasQuestionarioEscuta: values,
+      respostasQuestionarioEscuta: valuesWithResponsible,
     });
     setConfirmOpen(false);
   };
 
   const renderQuestion = (pergunta: PerguntaQuestionario) => {
-    const answer = values[pergunta.id];
+    const answer = valuesWithResponsible[pergunta.id];
     const otherVisible = pergunta.permiteOutro && includesOther(answer);
 
     if (pergunta.tipo === "selecao_unica") {
@@ -1771,7 +1872,7 @@ function QuestionnaireDrawer({
           {otherVisible ? (
             <TextField
               label="Detalhe a opção Outro"
-              value={getStringAnswer(values, `${pergunta.id}_outro`)}
+              value={getStringAnswer(valuesWithResponsible, `${pergunta.id}_outro`)}
               onChange={(event) => updateAnswer(`${pergunta.id}_outro`, event.target.value)}
               size="small"
             />
@@ -1781,7 +1882,7 @@ function QuestionnaireDrawer({
     }
 
     if (pergunta.tipo === "selecao_multipla") {
-      const answers = getArrayAnswer(values, pergunta.id);
+      const answers = getArrayAnswer(valuesWithResponsible, pergunta.id);
 
       return (
         <FormControl className={styles.dynamicQuestion} key={pergunta.id}>
@@ -1808,7 +1909,7 @@ function QuestionnaireDrawer({
           {otherVisible ? (
             <TextField
               label="Detalhe a opção Outro"
-              value={getStringAnswer(values, `${pergunta.id}_outro`)}
+              value={getStringAnswer(valuesWithResponsible, `${pergunta.id}_outro`)}
               onChange={(event) => updateAnswer(`${pergunta.id}_outro`, event.target.value)}
               size="small"
             />
@@ -1817,12 +1918,15 @@ function QuestionnaireDrawer({
       );
     }
 
+    const isResponsibleQuestion = pergunta.id === "responsavel_escuta";
+
     return (
       <TextField
         key={pergunta.id}
         label={`${pergunta.titulo}${pergunta.obrigatoria ? " *" : ""}`}
-        value={getStringAnswer(values, pergunta.id)}
+        value={getStringAnswer(valuesWithResponsible, pergunta.id)}
         onChange={(event) => updateAnswer(pergunta.id, event.target.value)}
+        disabled={isResponsibleQuestion}
         type={pergunta.tipo === "data" ? "date" : "text"}
         multiline={pergunta.tipo === "texto_longo"}
         minRows={pergunta.tipo === "texto_longo" ? 5 : undefined}
@@ -1860,7 +1964,7 @@ function QuestionnaireDrawer({
           ) : (
             questionarioEscuta.secoes.map((secao) => {
               const questions = secao.perguntas.filter((pergunta) =>
-                matchesQuestionCondition(pergunta, values),
+                matchesQuestionCondition(pergunta, valuesWithResponsible),
               );
 
               if (!questions.length) {
@@ -1919,6 +2023,8 @@ function QuestionnaireDrawer({
 
 export function EscutasPage() {
   const session = useAuthSession();
+  const currentCoordinatorName =
+    session?.payload.nomeSocial?.trim() || session?.payload.nome || "";
   const unidadeAcademicaId = session?.payload.UnidadeAcademicaVinculada
     ? session.payload.UnidadeAcademicaId || undefined
     : undefined;
@@ -2023,7 +2129,7 @@ export function EscutasPage() {
     const isEditing = questionnaireEscuta.status === "REALIZADA";
 
     try {
-      await finishQuestionnaireMutation.mutateAsync({
+      const updatedEscuta = await finishQuestionnaireMutation.mutateAsync({
         id: questionnaireEscuta.id,
         data,
       });
@@ -2031,6 +2137,7 @@ export function EscutasPage() {
         isEditing ? "Questionário da escuta atualizado." : "Questionário da escuta finalizado.",
       );
       setQuestionnaireEscuta(null);
+      setDetailsEscuta((current) => (current?.id === updatedEscuta.id ? updatedEscuta : current));
     } catch (error) {
       toast.error(
         error instanceof Error
@@ -2039,6 +2146,40 @@ export function EscutasPage() {
             ? "Não foi possível atualizar a escuta."
             : "Não foi possível finalizar a escuta.",
       );
+    }
+  };
+
+  const handleSavePaai = async (escuta: Escuta, values: PaaiEditableValues) => {
+    if (!escuta.respostasQuestionarioEscuta) {
+      toast.error("Nao foi possivel localizar as respostas da escuta.");
+      return;
+    }
+
+    const questionarioEscutaId = escuta.questionarioEscutaId ?? questionarioEscutaQuery.data?.id;
+    const questionarioEscutaVersao =
+      escuta.questionarioEscutaVersao ?? questionarioEscutaQuery.data?.versao;
+
+    if (!questionarioEscutaId || !questionarioEscutaVersao) {
+      toast.error("Nao foi possivel localizar o questionario da escuta.");
+      return;
+    }
+
+    try {
+      const updatedEscuta = await finishQuestionnaireMutation.mutateAsync({
+        id: escuta.id,
+        data: {
+          questionarioEscutaId,
+          questionarioEscutaVersao,
+          respostasQuestionarioEscuta: escuta.respostasQuestionarioEscuta,
+          resumoCaso: values.resumoCaso,
+          encaminhamentos: values.encaminhamentos,
+        },
+      });
+
+      setDetailsEscuta(updatedEscuta);
+      toast.success("PAAI atualizado com sucesso.");
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Nao foi possivel salvar o PAAI.");
     }
   };
 
@@ -2131,10 +2272,12 @@ export function EscutasPage() {
           setDetailsEscuta(null);
           setQuestionnaireEscuta(escuta);
         }}
+        onSavePaai={handleSavePaai}
         onSchedule={(escuta) => {
           setDetailsEscuta(null);
           setSchedulingEscuta(escuta);
         }}
+        isSavingPaai={finishQuestionnaireMutation.isPending}
       />
 
       <ScheduleDialog
@@ -2153,6 +2296,7 @@ export function EscutasPage() {
         open={Boolean(questionnaireEscuta)}
         escuta={questionnaireEscuta}
         questionarioEscuta={questionarioEscutaQuery.data}
+        coordinatorName={currentCoordinatorName}
         isLoading={questionarioEscutaQuery.isLoading}
         isSubmitting={finishQuestionnaireMutation.isPending}
         onClose={() => setQuestionnaireEscuta(null)}

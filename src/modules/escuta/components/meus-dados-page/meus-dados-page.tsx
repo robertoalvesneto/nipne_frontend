@@ -21,6 +21,7 @@ import type { Student, StudentListItem } from "@/modules/aluno/interfaces/studen
 import type { CreateStudentBodyApiDto } from "@/modules/aluno/services/create-student-service";
 import { useAuthSession } from "@/modules/auth/hooks/use-auth-session";
 import { formatDatePtBr } from "@/shared/utils/format-date";
+import { formatPhone } from "@/shared/utils/phone-mask";
 import { useCreateEscuta } from "../../hooks/use-create-escuta";
 import { useEscutas } from "../../hooks/use-get-escutas";
 import type { Escuta } from "../../interfaces/escuta";
@@ -108,7 +109,7 @@ function buildInitialValues({
   return {
     nome: details?.pessoaInstitucional.nome ?? student?.pessoaInstitucional.nome ?? sessionName,
     dataNascimento: getDateInputValue(details?.dataNascimento ?? student?.dataNascimento),
-    telefoneWhatsapp: details?.telefoneWhatsapp ?? escuta?.telefoneWhatsapp ?? phone ?? "",
+    telefoneWhatsapp: formatPhone(details?.telefoneWhatsapp ?? escuta?.telefoneWhatsapp ?? phone ?? ""),
     emailPessoal: details?.emailPessoal ?? escuta?.emailPessoal ?? "",
     outroContato: details?.outroContato ?? escuta?.outroContato ?? "",
     formaPreferencialContato:
@@ -143,7 +144,7 @@ function buildStudentCadastroPayload(
   const contatosTelefonicos = values.telefoneWhatsapp
     ? [
         {
-          telefone: values.telefoneWhatsapp,
+          telefone: formatPhone(values.telefoneWhatsapp),
           formaPreferencialContato: true,
           descricao: "Whatsapp",
         },
@@ -157,7 +158,7 @@ function buildStudentCadastroPayload(
     unidadeAcademicaId: course.unidadeAcademica.id,
     ...(values.dataNascimento ? { dataNascimento: values.dataNascimento } : {}),
     ...(contatosTelefonicos.length ? { contatosTelefonicos } : {}),
-    telefoneWhatsapp: values.telefoneWhatsapp,
+    telefoneWhatsapp: formatPhone(values.telefoneWhatsapp),
     emailPessoal: values.emailPessoal,
     outroContato: values.outroContato,
     formaPreferencialContato: values.formaPreferencialContato,

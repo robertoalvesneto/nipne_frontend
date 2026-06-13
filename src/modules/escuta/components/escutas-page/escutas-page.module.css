@@ -328,6 +328,11 @@
   margin: 0;
 }
 
+.paaiActions {
+  display: flex;
+  justify-content: flex-end;
+}
+
 .readonlySection {
   background: #fdfdfd;
   display: flex;
@@ -563,9 +568,9 @@
 
 .readonlyAnswer {
   border-bottom: 1px solid #d6e4dc;
-  display: grid;
+  display: flex;
+  flex-direction: column;
   gap: 8px;
-  grid-template-columns: minmax(180px, 0.8fr) minmax(0, 1.2fr);
   padding-bottom: 10px;
 }
 
@@ -583,6 +588,18 @@
   color: #3f3f46;
   margin: 0;
   overflow-wrap: anywhere;
+}
+
+.readonlyBulletList {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin: 0;
+  padding-left: 18px;
+}
+
+.readonlyBulletList li {
+  line-height: 1.45;
 }
 
 .loadingState {

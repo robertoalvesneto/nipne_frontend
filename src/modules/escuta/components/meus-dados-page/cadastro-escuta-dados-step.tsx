@@ -14,6 +14,7 @@ import {
 } from "@mui/material";
 import type { Course } from "@/modules/aluno/interfaces/course";
 import type { DisciplinaOferta } from "@/modules/disciplina/interfaces/disciplina-oferta";
+import { formatPhone } from "@/shared/utils/phone-mask";
 import type { QuestionarioCadastro } from "../../interfaces/questionario-cadastro";
 import type { CadastroValues } from "./cadastro-escuta-types";
 import styles from "./meus-dados-page.module.css";
@@ -89,11 +90,18 @@ export function CadastroEscutaDadosStep({
           />
           <TextField
             label="Telefone (Whatsapp) *"
-            value={values.telefoneWhatsapp}
+            value={formatPhone(values.telefoneWhatsapp)}
             onChange={(event) =>
-              onValueChange("telefoneWhatsapp", event.target.value)
+              onValueChange("telefoneWhatsapp", formatPhone(event.target.value))
             }
+            placeholder="(92) 99999-9999"
             size="small"
+            slotProps={{
+              htmlInput: {
+                inputMode: "tel",
+                maxLength: 15,
+              },
+            }}
           />
           <TextField
             label="E-mail pessoal *"
