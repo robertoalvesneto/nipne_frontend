@@ -36,19 +36,6 @@ function getProfessorText(disciplina: DisciplinaOferta) {
   return professores.join(", ") || "-";
 }
 
-function getPeriodoAnoMes(disciplina: DisciplinaOferta) {
-  const date = new Date(disciplina.periodoLetivo.dataInicio);
-
-  if (Number.isNaN(date.getTime())) {
-    return disciplina.periodoLetivo.nome;
-  }
-
-  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(
-    2,
-    "0",
-  )}`;
-}
-
 const columns: TableColumn<DisciplinaTableRow>[] = [
   {
     key: "id",
@@ -93,7 +80,7 @@ const columns: TableColumn<DisciplinaTableRow>[] = [
     key: "periodo",
     header: "Período",
     width: "10%",
-    render: (disciplina) => getPeriodoAnoMes(disciplina),
+    render: (disciplina) => disciplina.periodoLetivo.nome,
   },
   {
     key: "matriculados",

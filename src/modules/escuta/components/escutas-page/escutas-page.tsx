@@ -2057,7 +2057,7 @@ export function EscutasPage() {
               setPage(1);
               setSearchTerm(event.target.value);
             }}
-            placeholder="Nome do aluno"
+            placeholder="Nome, e-mail ou matrícula"
             size="small"
             value={searchTerm}
             slotProps={{

@@ -44,16 +44,6 @@ function getProfessorText(link: ClassGroupStudent) {
   );
 }
 
-function getPeriodoAnoMes(link: ClassGroupStudent) {
-  const date = new Date(link.turma.periodoLetivo.dataInicio);
-
-  if (Number.isNaN(date.getTime())) {
-    return link.turma.periodoLetivo.nome;
-  }
-
-  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}`;
-}
-
 function getSearchableText(link: ClassGroupStudent) {
   return [
     link.turma.disciplina.nome,
@@ -61,7 +51,7 @@ function getSearchableText(link: ClassGroupStudent) {
     link.turma.disciplina.curso.nome,
     link.turma.disciplina.curso.sigla,
     link.turma.periodoLetivo.nome,
-    getPeriodoAnoMes(link),
+    link.turma.periodoLetivo.nome,
     getProfessorText(link),
     String(link.turma.disciplina.cargaHoraria),
   ].join(" ");
@@ -126,9 +116,7 @@ function DisciplinaDetailsDrawer({
             </div>
             <div>
               <dt>Período letivo</dt>
-              <dd>
-                {turma.periodoLetivo.nome} ({getPeriodoAnoMes(disciplina)})
-              </dd>
+              <dd>{turma.periodoLetivo.nome}</dd>
             </div>
             <div>
               <dt>Carga horária</dt>
@@ -247,7 +235,7 @@ export function MinhasDisciplinasPage() {
         key: "periodo",
         header: "Período",
         width: "10%",
-        render: (row) => getPeriodoAnoMes(row),
+        render: (row) => row.turma.periodoLetivo.nome,
       },
       {
         key: "status",

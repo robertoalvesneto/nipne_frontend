@@ -131,19 +131,6 @@ function getProfessorNome(professor: Professor) {
   );
 }
 
-function getPeriodLabel(period: AcademicPeriod) {
-  const date = new Date(period.dataInicio);
-
-  if (Number.isNaN(date.getTime())) {
-    return period.nome;
-  }
-
-  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(
-    2,
-    "0",
-  )}`;
-}
-
 function buildCourseLookup(courses: Course[]) {
   const courseByKey = new Map<string, Course>();
 
@@ -160,7 +147,7 @@ function buildPeriodLookup(periods: AcademicPeriod[]) {
   const periodByKey = new Map<string, AcademicPeriod>();
 
   for (const period of periods) {
-    for (const key of [period.id, period.nome, getPeriodLabel(period)]) {
+    for (const key of [period.id, period.nome, period.nome]) {
       periodByKey.set(normalizeHeader(key), period);
     }
   }
@@ -280,7 +267,9 @@ function parseDisciplinasCsv(
     }
 
     if (!codigo) {
-      throw new Error(`Informe o código da disciplina na linha ${rowIndex + 2}.`);
+      throw new Error(
+        `Informe o código da disciplina na linha ${rowIndex + 2}.`,
+      );
     }
 
     if (!Number.isInteger(cargaHoraria) || cargaHoraria <= 0) {
@@ -294,7 +283,9 @@ function parseDisciplinasCsv(
     }
 
     if (!period) {
-      throw new Error(`Período letivo não encontrado na linha ${rowIndex + 2}.`);
+      throw new Error(
+        `Período letivo não encontrado na linha ${rowIndex + 2}.`,
+      );
     }
 
     if (!professor) {
@@ -354,13 +345,14 @@ export function DisciplinasPage() {
       ...(statusFilter === "ativos" ? { ativo: true } : {}),
       ...(statusFilter === "inativos" ? { ativo: false } : {}),
     }),
-    [courseFilter, page, periodFilter, searchTerm, statusFilter],
+    [page, searchTerm, courseFilter, periodFilter, statusFilter],
   );
 
   const courses = coursesQuery.data?.data ?? [];
   const periods = periodsQuery.data?.data ?? [];
   const professors = professorsQuery.data?.data ?? [];
   const totalPages = Math.max(paginationMeta?.totalPages ?? 1, 1);
+
   const isSubmitting =
     createDisciplinaMutation.isPending ||
     updateDisciplinaMutation.isPending ||
@@ -481,9 +473,7 @@ export function DisciplinasPage() {
     }
   };
 
-  const handleSubmitDisciplina = async (
-    values: DisciplinaFormSubmitValues,
-  ) => {
+  const handleSubmitDisciplina = async (values: DisciplinaFormSubmitValues) => {
     setFormError(undefined);
 
     try {
@@ -618,10 +608,10 @@ export function DisciplinasPage() {
             className={styles.searchField}
             label="Buscar disciplina"
             onChange={(event) => {
-              setPage(1);
               setSearchTerm(event.target.value);
+              setPage(1);
             }}
-            placeholder="Nome, professor, período ou curso"
+            placeholder="Nome ou professor"
             size="small"
             value={searchTerm}
             slotProps={{
@@ -663,7 +653,7 @@ export function DisciplinasPage() {
               <MenuItem value="">Todos os períodos</MenuItem>
               {periods.map((period) => (
                 <MenuItem key={period.id} value={period.id}>
-                  {getPeriodLabel(period)}
+                  {period.nome}
                 </MenuItem>
               ))}
             </Select>

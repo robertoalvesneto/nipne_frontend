@@ -18,20 +18,6 @@ import type { QuestionarioCadastro } from "../../interfaces/questionario-cadastr
 import type { CadastroValues } from "./cadastro-escuta-types";
 import styles from "./meus-dados-page.module.css";
 
-function getPeriodoAnoMes(dataInicio?: string | Date | null, fallback = "-") {
-  if (!dataInicio) {
-    return fallback;
-  }
-
-  const date = new Date(dataInicio);
-
-  if (Number.isNaN(date.getTime())) {
-    return fallback;
-  }
-
-  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}`;
-}
-
 function getProfessoresText(disciplina: DisciplinaOferta) {
   return (
     disciplina.professores
@@ -95,26 +81,34 @@ export function CadastroEscutaDadosStep({
             label="Data de nascimento"
             type="date"
             value={values.dataNascimento}
-            onChange={(event) => onValueChange("dataNascimento", event.target.value)}
+            onChange={(event) =>
+              onValueChange("dataNascimento", event.target.value)
+            }
             size="small"
             slotProps={{ inputLabel: { shrink: true } }}
           />
           <TextField
             label="Telefone (Whatsapp) *"
             value={values.telefoneWhatsapp}
-            onChange={(event) => onValueChange("telefoneWhatsapp", event.target.value)}
+            onChange={(event) =>
+              onValueChange("telefoneWhatsapp", event.target.value)
+            }
             size="small"
           />
           <TextField
             label="E-mail pessoal *"
             value={values.emailPessoal}
-            onChange={(event) => onValueChange("emailPessoal", event.target.value)}
+            onChange={(event) =>
+              onValueChange("emailPessoal", event.target.value)
+            }
             size="small"
           />
           <TextField
             label="Outro contato"
             value={values.outroContato}
-            onChange={(event) => onValueChange("outroContato", event.target.value)}
+            onChange={(event) =>
+              onValueChange("outroContato", event.target.value)
+            }
             size="small"
           />
           <FormControl size="small">
@@ -123,7 +117,9 @@ export function CadastroEscutaDadosStep({
               labelId="forma-contato-label"
               label="Forma preferencial *"
               value={values.formaPreferencialContato}
-              onChange={(event) => onValueChange("formaPreferencialContato", event.target.value)}
+              onChange={(event) =>
+                onValueChange("formaPreferencialContato", event.target.value)
+              }
             >
               <MenuItem value="Whatsapp">Whatsapp</MenuItem>
               <MenuItem value="E-mail">E-mail</MenuItem>
@@ -161,7 +157,9 @@ export function CadastroEscutaDadosStep({
           <TextField
             label="E-mail institucional"
             value={values.emailInstitucional}
-            onChange={(event) => onValueChange("emailInstitucional", event.target.value)}
+            onChange={(event) =>
+              onValueChange("emailInstitucional", event.target.value)
+            }
             size="small"
             required
           />
@@ -171,7 +169,9 @@ export function CadastroEscutaDadosStep({
               labelId="modalidade-label"
               label="Modalidade"
               value={values.modalidadeCurso}
-              onChange={(event) => onValueChange("modalidadeCurso", event.target.value)}
+              onChange={(event) =>
+                onValueChange("modalidadeCurso", event.target.value)
+              }
             >
               <MenuItem value="Bacharelado">Bacharelado</MenuItem>
               <MenuItem value="Licenciatura">Licenciatura</MenuItem>
@@ -184,20 +184,38 @@ export function CadastroEscutaDadosStep({
           <RadioGroup
             row
             value={values.ofertaCurso}
-            onChange={(event) => onValueChange("ofertaCurso", event.target.value)}
+            onChange={(event) =>
+              onValueChange("ofertaCurso", event.target.value)
+            }
           >
-            <FormControlLabel value="Regular" control={<Radio />} label="Regular" />
-            <FormControlLabel value="Especial" control={<Radio />} label="Especial" />
+            <FormControlLabel
+              value="Regular"
+              control={<Radio />}
+              label="Regular"
+            />
+            <FormControlLabel
+              value="Especial"
+              control={<Radio />}
+              label="Especial"
+            />
           </RadioGroup>
         </FormControl>
         {values.ofertaCurso === "Especial" ? (
-          <FormControl className={styles.specialOfferField} size="small" required>
-            <InputLabel id="tipo-oferta-especial-label">Tipo de oferta especial</InputLabel>
+          <FormControl
+            className={styles.specialOfferField}
+            size="small"
+            required
+          >
+            <InputLabel id="tipo-oferta-especial-label">
+              Tipo de oferta especial
+            </InputLabel>
             <Select
               labelId="tipo-oferta-especial-label"
               label="Tipo de oferta especial"
               value={values.tipoOfertaEspecial}
-              onChange={(event) => onValueChange("tipoOfertaEspecial", event.target.value)}
+              onChange={(event) =>
+                onValueChange("tipoOfertaEspecial", event.target.value)
+              }
               disabled={!tipoOfertaEspecialQuestion}
             >
               {tipoOfertaEspecialQuestion?.opcoes?.map((option) => (
@@ -231,7 +249,8 @@ export function CadastroEscutaDadosStep({
               </MenuItem>
               {availableClassGroups.map((classGroup) => (
                 <MenuItem key={classGroup.id} value={classGroup.id}>
-                  {classGroup.disciplina.nome} - {classGroup.sigla}
+                  {classGroup.disciplina.nome} - {classGroup.periodoLetivo.nome}{" "}
+                  - {classGroup.sigla}
                 </MenuItem>
               ))}
             </Select>
@@ -258,10 +277,7 @@ export function CadastroEscutaDadosStep({
                 <span>{classGroup.disciplina.nome}</span>
                 <span>{getProfessoresText(classGroup)}</span>
                 <span>
-                  {getPeriodoAnoMes(
-                    classGroup.periodoLetivo.dataInicio,
-                    classGroup.periodoLetivo.nome,
-                  )}
+                  {classGroup.periodoLetivo.nome}
                 </span>
                 <IconButton
                   aria-label={`Remover ${classGroup.disciplina.nome}`}

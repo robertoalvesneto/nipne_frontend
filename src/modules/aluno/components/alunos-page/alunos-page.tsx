@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import AddCircleOutlinedIcon from "@mui/icons-material/AddCircleOutlined";
 import CloudUploadOutlinedIcon from "@mui/icons-material/CloudUploadOutlined";
 import SearchOutlinedIcon from "@mui/icons-material/SearchOutlined";
@@ -92,6 +92,7 @@ export function AlunosPage() {
       page,
       pageSize,
       ...(searchTerm.trim() ? { search: searchTerm.trim() } : {}),
+      ...(searchTerm ? { search: searchTerm } : {}),
       ...(courseFilter ? { cursoId: courseFilter } : {}),
       ...(statusFilter === "ativos" ? { ativo: true } : {}),
       ...(statusFilter === "inativos" ? { ativo: false } : {}),
@@ -143,6 +144,11 @@ export function AlunosPage() {
     selectedAluno,
   ]);
   const totalPages = Math.max(paginationMeta?.totalPages ?? 1, 1);
+
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setPage(1);
+  }, [searchTerm]);
 
   const handleStatusChange = (event: SelectChangeEvent) => {
     setPage(1);

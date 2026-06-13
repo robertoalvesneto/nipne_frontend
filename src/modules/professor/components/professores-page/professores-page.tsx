@@ -53,7 +53,7 @@ export function ProfessoresPage() {
     () => ({
       page,
       pageSize,
-      ...(searchTerm.trim() ? { search: searchTerm.trim() } : {}),
+      ...(searchTerm ? { search: searchTerm } : {}),
       ...(unitFilter ? { unidadeAcademicaId: unitFilter } : {}),
       ...(statusFilter === "ativos" ? { ativo: true } : {}),
       ...(statusFilter === "inativos" ? { ativo: false } : {}),
@@ -163,8 +163,8 @@ export function ProfessoresPage() {
             className={styles.searchField}
             label="Buscar professor"
             onChange={(event) => {
-              setPage(1);
               setSearchTerm(event.target.value);
+              setPage(1);
             }}
             placeholder="Nome, e-mail ou matrícula"
             size="small"
