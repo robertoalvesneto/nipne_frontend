@@ -53,11 +53,12 @@ export function ProfessoresPage() {
     () => ({
       page,
       pageSize,
+      ...(searchTerm.trim() ? { search: searchTerm.trim() } : {}),
       ...(unitFilter ? { unidadeAcademicaId: unitFilter } : {}),
       ...(statusFilter === "ativos" ? { ativo: true } : {}),
       ...(statusFilter === "inativos" ? { ativo: false } : {}),
     }),
-    [page, statusFilter, unitFilter],
+    [page, searchTerm, statusFilter, unitFilter],
   );
   const totalPages = Math.max(paginationMeta?.totalPages ?? 1, 1);
 
@@ -161,7 +162,10 @@ export function ProfessoresPage() {
           <TextField
             className={styles.searchField}
             label="Buscar professor"
-            onChange={(event) => setSearchTerm(event.target.value)}
+            onChange={(event) => {
+              setPage(1);
+              setSearchTerm(event.target.value);
+            }}
             placeholder="Nome, e-mail ou matrícula"
             size="small"
             value={searchTerm}

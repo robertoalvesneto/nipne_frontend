@@ -5,6 +5,7 @@ import type { Disciplina } from "../interfaces/disciplina";
 export interface DisciplinasListQueryApiDto {
   page?: number;
   pageSize?: number;
+  search?: string;
   cursoId?: string;
   nome?: string;
   cargaHoraria?: number;

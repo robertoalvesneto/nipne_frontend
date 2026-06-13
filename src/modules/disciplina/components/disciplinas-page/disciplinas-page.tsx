@@ -348,12 +348,13 @@ export function DisciplinasPage() {
     () => ({
       page,
       pageSize,
+      ...(searchTerm.trim() ? { search: searchTerm.trim() } : {}),
       ...(courseFilter ? { cursoId: courseFilter } : {}),
       ...(periodFilter ? { periodoLetivoId: periodFilter } : {}),
       ...(statusFilter === "ativos" ? { ativo: true } : {}),
       ...(statusFilter === "inativos" ? { ativo: false } : {}),
     }),
-    [courseFilter, page, periodFilter, statusFilter],
+    [courseFilter, page, periodFilter, searchTerm, statusFilter],
   );
 
   const courses = coursesQuery.data?.data ?? [];
@@ -616,7 +617,10 @@ export function DisciplinasPage() {
           <TextField
             className={styles.searchField}
             label="Buscar disciplina"
-            onChange={(event) => setSearchTerm(event.target.value)}
+            onChange={(event) => {
+              setPage(1);
+              setSearchTerm(event.target.value);
+            }}
             placeholder="Nome, professor, período ou curso"
             size="small"
             value={searchTerm}

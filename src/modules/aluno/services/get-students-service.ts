@@ -5,6 +5,7 @@ import type { StudentListItem } from "../interfaces/student";
 export interface StudentsListQueryApiDto {
   page?: number;
   pageSize?: number;
+  search?: string;
   nome?: string;
   nomeSocial?: string;
   emailInstitucional?: string;

@@ -91,11 +91,12 @@ export function AlunosPage() {
     () => ({
       page,
       pageSize,
+      ...(searchTerm.trim() ? { search: searchTerm.trim() } : {}),
       ...(courseFilter ? { cursoId: courseFilter } : {}),
       ...(statusFilter === "ativos" ? { ativo: true } : {}),
       ...(statusFilter === "inativos" ? { ativo: false } : {}),
     }),
-    [courseFilter, page, statusFilter],
+    [courseFilter, page, searchTerm, statusFilter],
   );
   const isSubmitting =
     createStudentMutation.isPending ||
@@ -319,7 +320,10 @@ export function AlunosPage() {
           <TextField
             className={styles.searchField}
             label="Buscar aluno"
-            onChange={(event) => setSearchTerm(event.target.value)}
+            onChange={(event) => {
+              setPage(1);
+              setSearchTerm(event.target.value);
+            }}
             placeholder="Nome, e-mail ou matrícula"
             size="small"
             value={searchTerm}

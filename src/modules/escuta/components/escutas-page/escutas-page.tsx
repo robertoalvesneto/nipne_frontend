@@ -29,7 +29,7 @@ import {
   Tooltip,
   type SelectChangeEvent,
 } from "@mui/material";
-import { useMemo, useState, type FormEvent } from "react";
+import { useMemo, useState, type FormEvent, type ReactNode } from "react";
 import { toast } from "react-toastify";
 import { useClassGroupStudents } from "@/modules/aluno/hooks/use-get-class-group-students";
 import type { ClassGroupStudent } from "@/modules/aluno/interfaces/class-group-student";
@@ -51,7 +51,7 @@ import type { FinishEscutaQuestionarioBodyApiDto } from "../../services/finish-e
 import styles from "./escutas-page.module.css";
 
 type StatusFilter = "TODAS" | StatusEscuta;
-type DetailsTab = "gerais" | "paai" | "escuta";
+type DetailsTab = "gerais" | "escuta" | "paai";
 
 type QuestionnaireValues = {
   temTutor: "SIM" | "NAO";
@@ -264,7 +264,17 @@ function getAnswerLabels(
   respostas: RespostasQuestionarioEscuta | null | undefined,
   key: string,
 ) {
-  const labels = getArrayAnswer(respostas, key)
+  const answers = getArrayAnswer(respostas, key);
+  const question = getAllQuestions(questionario).find((pergunta) => pergunta.id === key);
+  const orderedAnswers = question?.opcoes?.length
+    ? [
+        ...question.opcoes.map((opcao) => opcao.valor).filter((value) => answers.includes(value)),
+        ...answers.filter(
+          (value) => !question.opcoes?.some((opcao) => opcao.valor === value),
+        ),
+      ]
+    : answers;
+  const labels = orderedAnswers
     .filter((value) => value !== "outro")
     .map((value) => getOptionLabel(questionario, key, value));
   const other = getStringAnswer(respostas, `${key}_outro`);
@@ -421,7 +431,7 @@ function ScheduleDialog({
 
 interface DetailFieldProps {
   label: string;
-  value: string;
+  value: ReactNode;
 }
 
 function DetailField({ label, value }: DetailFieldProps) {
@@ -430,6 +440,449 @@ function DetailField({ label, value }: DetailFieldProps) {
       <dt>{label}</dt>
       <dd>{value || "-"}</dd>
     </div>
+  );
+}
+
+function PaaiQuestionField({ label, value }: DetailFieldProps) {
+  return (
+    <div className={styles.paaiQuestion}>
+      <dt>{label}</dt>
+      <dd>{value || "-"}</dd>
+    </div>
+  );
+}
+
+type PaaiGuidanceItem = {
+  texto: string;
+};
+
+type PreferenceQuestionConfig = {
+  titulo: string;
+  ids: string[];
+  titleTerms: string[];
+};
+
+const paaiEvaluationGuidance: Record<string, string> = {
+  tempo_insuficiente:
+    "Concessão de tempo adicional: Garantir acréscimo de tempo para a realização de avaliações e a entrega de atividades em sala de aula. Verificar também a possibilidade de uma pausa para descanso cognitivo ou sensorial, quando necessário (em caso de desregulação).",
+  formato_dissertativo:
+    "Diversificação de formatos avaliativos para provas exclusivamente dissertativas: oferecer alternativas como avaliações orais, gravações (áudio ou vídeo), estudos de caso, atividades práticas, questões de múltipla escolha, entre outras.",
+  avaliacoes_extensas:
+    "Avaliações/atividades extensas, com elevado número de questões, que dificultam a concentração e o gerenciamento do tempo: reduzir a quantidade de questões dissertativas longas, bem como o número de questões na prova.",
+  muitos_assuntos:
+    "Fracionamento do conteúdo para avaliação: Dividir o conteúdo em avaliações menores ao longo do período, especialmente quando houver grande quantidade de temas, evitando concentrar vários assuntos em uma única avaliação e organizando as questões em sequência lógica.",
+  formato_oral:
+    "Diversificação de formatos avaliativos exclusivamente orais: Permitir que apresentações ou avaliações orais sejam substituídas por provas escritas, pesquisas ou mídias pré-gravadas.",
+  enunciados_extensos:
+    "Objetividade nos enunciados: elaborar questões com comandos claros, curtos e diretos, evitando textos excessivamente longos e organizando informações complexas em tópicos ou etapas.",
+  trabalhos_grupo:
+    "Flexibilidade nos agrupamentos: permitir que o estudante realize atividades individualmente, mesmo quando propostas em grupo, OU permitir que o aluno faça as atividades em trio, em vez de duplas (caso o aluno seja TEA e/ou TDAH).",
+  prazos_curtos:
+    "Extensão e flexibilização de prazos: conceder, no mínimo, uma semana para a realização de trabalhos/atividades extraclasse.",
+  atividades_multietapas:
+    "Adaptação da extensão das tarefas: Propor atividades mais concisas ou permitir entregas divididas em etapas menores em vez de um único formato extenso.",
+  sem_ambiente_alternativo:
+    "Flexibilização do ambiente: possibilitar a realização de provas e atividades em espaço alternativo à sala de aula, mais reservado, silencioso e com menor quantidade de estímulos, como o núcleo de inclusão ou um ambiente similar.",
+  leitura_interpretacao:
+    "Multimodalidade de recursos didáticos: Utilizar diferentes formatos para solicitar ao aluno o conhecimento (vídeos, mapas mentais, infográficos, demonstrações práticas), indo além da leitura e da interpretação exclusivas de textos acadêmicos.",
+};
+
+const paaiDidacticGuidance: Record<string, string> = {
+  sarcasmo_ironias_metaforas:
+    "Comunicação literal: Evitar o uso de sarcasmo, ironia, duplo sentido e metáforas, priorizando uma comunicação direta, objetiva e literal.",
+  conceitos_sem_exemplos:
+    "Instruções estruturadas e exemplificadas: fornecer instruções claras, organizadas e exemplificadas, associando os conteúdos teóricos a exemplos práticos e contextualizados.",
+  aulas_expositivas:
+    "Alternância metodológica: intercalar a exposição oral com outras estratégias pedagógicas, como atividades práticas ou resolução de problemas, evitando longos períodos de aula exclusivamente expositivos, de modo a favorecer a atenção, a participação e a aprendizagem.",
+  sem_participacao_duvidas:
+    "Incentivo à participação e ao esclarecimento de dúvidas: favorecer espaços e estratégias de mediação pedagógica que incentivem o(a) discente a fazer perguntas, solicitar esclarecimentos e manifestar dúvidas ou necessidades acadêmicas, de forma acolhedora e sem exposição desnecessária.",
+  sem_interacao_pares: "Promoção de interações acadêmicas mediadas.",
+  sem_mediacao_grupos:
+    "Mediação na formação de grupos: orientar e acompanhar a organização de equipes para atividades coletivas, favorecendo a participação do(a) estudante e evitando situações de isolamento ou exclusão decorrentes da divisão espontânea dos grupos.",
+  mudancas_cronograma:
+    "Previsibilidade do cronograma: manter, sempre que possível, o planejamento previamente apresentado para aulas, atividades e avaliações. Quando alterações forem necessárias, comunicá-las com antecedência adequada, a fim de favorecer a organização acadêmica do(a) discente.",
+  orientacoes_pouco_claras:
+    "Orientações claras para atividades acadêmicas: fornecer instruções objetivas e organizadas sobre atividades, trabalhos e avaliações, preferencialmente também por escrito, incluindo etapas de realização, prazos, formatos esperados e critérios de avaliação.",
+};
+
+const paaiMaterialGuidance: Record<string, string> = {
+  materiais_inacessiveis:
+    "Acessibilidade dos materiais didáticos: disponibilizar materiais com organização clara, linguagem objetiva e formatos acessíveis, preferencialmente também em meio digital, utilizando estrutura legível e recursos que favoreçam a leitura, a compreensão e a utilização das informações.",
+  sem_acesso_previo:
+    "Disponibilização prévia de materiais: disponibilizar, sempre que possível, materiais de leitura, slides e conteúdo das aulas com antecedência adequada, favorecendo a preparação, a organização acadêmica e o acompanhamento das atividades pelo(a) discente.",
+  sem_acesso_posterior:
+    "Acesso a recursos de revisão das aulas: possibilitar, quando viável, o acesso posterior aos conteúdos apresentados em aula, por meio de gravações, resumos, anotações estruturadas ou outros materiais de apoio que favoreçam a revisão dos conteúdos e o acompanhamento acadêmico pelo(a) discente.",
+};
+
+const cadastroConditionLabels: Record<string, string> = {
+  deficiencia_fisica: "Deficiência física",
+  deficiencia_visual_cegueira: "Deficiência visual - cegueira",
+  deficiencia_visual_baixa_visao: "Deficiência visual - baixa visão",
+  pessoa_surda: "Pessoa surda",
+  deficiencia_auditiva: "Pessoa com deficiência auditiva",
+  deficiencias_multiplas: "Deficiências múltiplas",
+  tea: "Transtorno do Espectro Autista (TEA)",
+  tdah: "Transtorno do Déficit de Atenção e Hiperatividade (TDAH)",
+  transtornos_aprendizagem:
+    "Transtornos específicos da aprendizagem (Dislexia, Discalculia, Dislalia, Disgrafia)",
+  altas_habilidades: "Altas habilidades ou superdotação",
+};
+
+const cadastroPreferenceLabels: Record<string, Record<string, string>> = {
+  preferencias_tipos_aula: {
+    aula_expositiva: "Aula expositiva;",
+    aula_pratica: "Aula prática;",
+    aula_dialogada: "Aula dialogada;",
+    resolucao_exercicios: "Aula com resolução de exercícios;",
+    exemplos_demonstracoes: "Aula baseada em exemplos e demonstrações;",
+    estudos_casos: "Aula com estudo de caso/situações reais;",
+    atividades_orientadas: "Aula com atividades orientadas durante a explicação.",
+  },
+  preferencias_forma_aprender: {
+    fazendo_resumos: "Fazendo resumos;",
+    resolvendo_exercicios: "Resolvendo exercícios;",
+    assistindo_videoaulas: "Assistindo videoaulas;",
+    estudando_sozinho: "Estudando sozinho;",
+    estudando_com_colegas: "Estudando com colegas;",
+    revisando_varias_vezes: "Revisando várias vezes;",
+    explicando_para_outra_pessoa: "Explicando para outra pessoa;",
+    atividades_praticas: "Realizando atividades práticas;",
+    imagens_esquemas: "Fazendo uso de imagens/esquemas.",
+  },
+  preferencias_tipos_atividades: {
+    escrita: "Escrita;",
+    leitura: "Leitura;",
+    apresentacao_oral: "Apresentação oral;",
+    exercicios: "Exercícios;",
+    atividades_praticas: "Atividades práticas;",
+    trabalhos_individuais: "Trabalhos individuais.",
+    trabalhos_grupo: "Trabalhos em grupo.",
+  },
+};
+
+const cadastroAccessibilityLabels: Record<string, string> = {
+  material_ampliado: "Necessidade de material ampliado;",
+  leitor_tela: "Necessidade de compatibilidade com leitor de tela;",
+  audiodescricao: "Necessidade de audiodescrição;",
+  ledor: "Necessidade de ledor;",
+  formatos_acessiveis: "Necessidade de formatos acessíveis de materiais acadêmicos.",
+  interprete_libras: "Necessidade de intérprete de Libras",
+  comunicacao_escrita: "Preferência por comunicação escrita",
+  legendas: "Necessidade de legendas",
+};
+
+const cadastroSensoryLabels: Record<string, string> = {
+  sensibilidade_estimulos: "Sensibilidade a sons, luzes ou ambientes muito estimulantes;",
+  pausas_atividades: "Necessidade de pausas durante atividades acadêmicas;",
+  mudancas_inesperadas: "Dificuldade com mudanças inesperadas;",
+  previsibilidade_atividades: "Necessidade de maior previsibilidade nas atividades;",
+  manter_foco: "Dificuldade em manter o foco;",
+  cumprir_prazos: "Dificuldade em gerenciamento de prazos;",
+  impulsividade: "Impulsividade;",
+  interacao_social: "Dificuldades relacionadas à interação social no contexto acadêmico.",
+};
+
+const paaiInstitutionalParagraphs = [
+  "O Núcleo de Inclusão reafirma seu compromisso em oferecer suporte ao(à) estudante e ao corpo docente no processo de promoção da acessibilidade acadêmica e pedagógica no contexto universitário. Nesse sentido, colocamo-nos à disposição para:",
+  "Ressaltamos que a atuação colaborativa entre o NIPNE e os(as) docentes é fundamental para favorecer a participação, a aprendizagem, a permanência e o desenvolvimento acadêmico dos(as) estudantes com necessidades específicas.",
+  "Por fim, destacamos que as ações desenvolvidas pelo NIPNE estão fundamentadas na Lei nº 12.764/2012, na Lei nº 13.146/2015, no Decreto nº 12.686/2025 e nos princípios da educação inclusiva e da acessibilidade no ensino superior.",
+];
+
+const paaiInstitutionalActions = [
+  "Dialogar com os(as) docentes sobre estratégias pedagógicas mais acessíveis;",
+  "Esclarecer dúvidas relacionadas às necessidades acadêmicas e às condições de acessibilidade do(a) estudante;",
+  "Acompanhar a implementação das orientações apresentadas neste documento;",
+  "Construir, de forma colaborativa, alternativas que respeitem a autonomia docente e os objetivos pedagógicos da disciplina.",
+];
+
+const preferenceQuestionConfigs: PreferenceQuestionConfig[] = [
+  {
+    titulo: "Tipos de aula",
+    ids: ["preferencias_tipos_aula", "tipos_aula", "tipo_aula"],
+    titleTerms: ["tipo", "aula"],
+  },
+  {
+    titulo: "Forma de aprender",
+    ids: ["preferencias_forma_aprender", "forma_aprender", "formas_aprender"],
+    titleTerms: ["forma", "aprender"],
+  },
+  {
+    titulo: "Tipos de atividades",
+    ids: ["preferencias_tipos_atividades", "tipos_atividades", "tipo_atividade"],
+    titleTerms: ["tipo", "atividade"],
+  },
+];
+
+function normalizeSearchText(value: string) {
+  return value
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase();
+}
+
+function getQuestionByNumberAndTerms(
+  questionario: QuestionarioEscuta | null | undefined,
+  numero: number,
+  titleTerms: string[],
+) {
+  return getAllQuestions(questionario).find((pergunta) => {
+    if (pergunta.numero !== numero) {
+      return false;
+    }
+
+    const normalizedTitle = normalizeSearchText(pergunta.titulo);
+
+    return titleTerms.every((term) => normalizedTitle.includes(normalizeSearchText(term)));
+  });
+}
+
+function getQuestionTextAnswerByNumber(
+  questionario: QuestionarioEscuta | null | undefined,
+  respostas: RespostasQuestionarioEscuta | null | undefined,
+  numero: number,
+  titleTerms: string[],
+) {
+  if (!questionario) {
+    return "";
+  }
+
+  const question = getQuestionByNumberAndTerms(questionario, numero, titleTerms);
+
+  return question ? formatReadOnlyAnswer(questionario, question, respostas ?? {}) : "";
+}
+
+function getCadastroRawAnswer(escuta: Escuta, key: string) {
+  return escuta.respostasQuestionarioCadastro?.[key];
+}
+
+function getCadastroStringAnswer(escuta: Escuta, key: string) {
+  const value = getCadastroRawAnswer(escuta, key);
+
+  return typeof value === "string" ? value.trim() : "";
+}
+
+function getCadastroArrayAnswer(escuta: Escuta, key: string) {
+  const value = getCadastroRawAnswer(escuta, key);
+
+  return Array.isArray(value)
+    ? value.filter((item): item is string => typeof item === "string" && item.trim().length > 0)
+    : [];
+}
+
+function getCadastroAnswerLabels(
+  escuta: Escuta,
+  key: string,
+  labels: Record<string, string> = {},
+) {
+  const answers = getCadastroArrayAnswer(escuta, key).filter((item) => item !== "outro");
+  const orderedAnswers = Object.keys(labels).length
+    ? [
+        ...Object.keys(labels).filter((item) => answers.includes(item)),
+        ...answers.filter((item) => !labels[item]),
+      ]
+    : answers;
+  const answerLabels = orderedAnswers.map((item) => labels[item] ?? item);
+  const other = getCadastroStringAnswer(escuta, `${key}_outro`);
+
+  return other ? [...answerLabels, other] : answerLabels;
+}
+
+function uniqueStrings(values: string[]) {
+  return Array.from(new Set(values.filter((value) => value.trim().length > 0)));
+}
+
+function buildCadastroPreferenceSections(escuta: Escuta) {
+  const configs = [
+    { titulo: "2.1 Em relação aos tipos de aula", key: "preferencias_tipos_aula" },
+    { titulo: "2.2 Em relação à forma de aprender", key: "preferencias_forma_aprender" },
+    { titulo: "2.3 Em relação aos tipos de atividades", key: "preferencias_tipos_atividades" },
+  ];
+
+  return configs
+    .map((config) => {
+      const items = getCadastroAnswerLabels(
+        escuta,
+        config.key,
+        cadastroPreferenceLabels[config.key],
+      );
+
+      return items.length ? { titulo: config.titulo, items } : null;
+    })
+    .filter((section): section is { titulo: string; items: string[] } => Boolean(section));
+}
+
+function buildAccessibilityNeeds(escuta: Escuta) {
+  return uniqueStrings([
+    ...getCadastroAnswerLabels(
+      escuta,
+      "detalhes_deficiencia_visual",
+      cadastroAccessibilityLabels,
+    ),
+    ...getCadastroAnswerLabels(
+      escuta,
+      "detalhes_deficiencia_auditiva",
+      cadastroAccessibilityLabels,
+    ),
+  ]);
+}
+
+function buildSensoryNeeds(escuta: Escuta) {
+  return uniqueStrings([
+    ...getCadastroAnswerLabels(escuta, "detalhes_tea", cadastroSensoryLabels),
+    ...getCadastroAnswerLabels(escuta, "detalhes_tdah", cadastroSensoryLabels),
+  ]);
+}
+
+function getEntradaCota(escuta: Escuta) {
+  const explicitAnswer = getCadastroStringAnswer(escuta, "entrada_cota");
+
+  if (explicitAnswer) {
+    return explicitAnswer;
+  }
+
+  return getCadastroStringAnswer(escuta, "forma_ingresso") === "cota" ? "Sim" : "";
+}
+
+function buildPaaiGuidanceItems(
+  respostas: RespostasQuestionarioEscuta | null | undefined,
+  questionId: string,
+  guidanceByValue: Record<string, string>,
+  options?: {
+    absenceValue?: string;
+    absenceText?: string;
+  },
+): PaaiGuidanceItem[] {
+  const answers = getArrayAnswer(respostas, questionId);
+
+  if (options?.absenceValue && answers.includes(options.absenceValue)) {
+    return [{ texto: options.absenceText ?? "Ausência de barreiras neste aspecto." }];
+  }
+
+  const selectedAnswers = new Set(answers.filter((answer) => answer !== "outro"));
+  const items: PaaiGuidanceItem[] = Object.entries(guidanceByValue)
+    .filter(([answer]) => selectedAnswers.has(answer))
+    .map(([, texto]) => texto)
+    .map((texto) => ({ texto }));
+  const otherText = getStringAnswer(respostas, `${questionId}_outro`);
+
+  if (answers.includes("outro") || otherText) {
+    items.push({
+      texto: otherText || "Campo para validação manual do NIPNE.",
+    });
+  }
+
+  return items;
+}
+
+function findPreferenceQuestion(
+  questionario: QuestionarioEscuta | null | undefined,
+  config: PreferenceQuestionConfig,
+) {
+  return getAllQuestions(questionario).find((pergunta) => {
+    if (config.ids.includes(pergunta.id)) {
+      return true;
+    }
+
+    const normalizedTitle = normalizeSearchText(pergunta.titulo);
+
+    return config.titleTerms.every((term) => normalizedTitle.includes(normalizeSearchText(term)));
+  });
+}
+
+function buildPreferenceSections(
+  questionario: QuestionarioEscuta | null | undefined,
+  respostas: RespostasQuestionarioEscuta | null | undefined,
+  escuta: Escuta,
+) {
+  const cadastroPreferences = buildCadastroPreferenceSections(escuta);
+
+  if (cadastroPreferences.length) {
+    return cadastroPreferences;
+  }
+
+  if (!questionario) {
+    return [];
+  }
+
+  return preferenceQuestionConfigs
+    .map((config) => {
+      const question = findPreferenceQuestion(questionario, config);
+
+      if (!question) {
+        return null;
+      }
+
+      const items =
+        question.tipo === "selecao_multipla"
+          ? getAnswerLabels(questionario, respostas, question.id)
+          : [formatReadOnlyAnswer(questionario, question, respostas ?? {})].filter(
+              (value) => value && value !== "-",
+            );
+
+      return items.length ? { titulo: config.titulo, items } : null;
+    })
+    .filter((section): section is { titulo: string; items: string[] } => Boolean(section));
+}
+
+function renderGuidanceList(items: PaaiGuidanceItem[]) {
+  if (!items.length) {
+    return <p>-</p>;
+  }
+
+  return (
+    <ul className={styles.paaiList}>
+      {items.map((item) => (
+        <li key={item.texto}>{item.texto}</li>
+      ))}
+    </ul>
+  );
+}
+
+function renderPaaiValueList(items: string[]) {
+  if (!items.length) {
+    return "-";
+  }
+
+  return (
+    <ul className={styles.paaiAnswerList}>
+      {items.map((item) => (
+        <li key={item}>{item}</li>
+      ))}
+    </ul>
+  );
+}
+
+function renderDisciplineSummary(disciplineLinks: ClassGroupStudent[]) {
+  if (!disciplineLinks.length) {
+    return "-";
+  }
+
+  return (
+    <ul className={styles.paaiAnswerList}>
+      {disciplineLinks.map((link) => (
+        <li key={link.id}>
+          {link.turma.disciplina.nome}
+          <span>{link.turma.periodoLetivo.nome}</span>
+        </li>
+      ))}
+    </ul>
+  );
+}
+
+function renderProfessorSummary(disciplineLinks: ClassGroupStudent[]) {
+  if (!disciplineLinks.length) {
+    return "-";
+  }
+
+  return (
+    <ul className={styles.paaiAnswerList}>
+      {disciplineLinks.map((link) => (
+        <li key={link.id}>
+          {getProfessorNames(link)}
+          <span>{link.turma.disciplina.nome}</span>
+        </li>
+      ))}
+    </ul>
   );
 }
 
@@ -447,11 +900,63 @@ function PaaiPreviewPanel({
   const respostas = escuta.respostasQuestionarioEscuta;
   const person = escuta.estudante.pessoaInstitucional;
   const studentName = getStudentName(escuta);
-  const avaliacoes = getAnswerLabels(questionarioEscuta, respostas, "barreiras_avaliacoes");
-  const didatica = getAnswerLabels(questionarioEscuta, respostas, "barreiras_didatica");
-  const materiais = getAnswerLabels(questionarioEscuta, respostas, "barreiras_materiais");
-  const impactos = getAnswerLabels(questionarioEscuta, respostas, "impacto_barreiras");
+  const identificationName =
+    getQuestionTextAnswerByNumber(questionarioEscuta, respostas, 1, ["nome"]) || studentName;
+  const identificationRegistration =
+    getQuestionTextAnswerByNumber(questionarioEscuta, respostas, 2, ["matricula"]) ||
+    escuta.estudante.cursoAtual?.matricula ||
+    person.matricula;
+  const identificationCourse =
+    getQuestionTextAnswerByNumber(questionarioEscuta, respostas, 3, ["curso"]) ||
+    escuta.estudante.cursoAtual?.nome ||
+    "";
+  const periodo =
+    getCadastroStringAnswer(escuta, "periodo") ||
+    getCadastroStringAnswer(escuta, "periodo_atual") ||
+    getCadastroStringAnswer(escuta, "periodo_curso");
+  const diagnosticoItems = [
+    ...getCadastroAnswerLabels(escuta, "condicoes", cadastroConditionLabels),
+    getCadastroStringAnswer(escuta, "diagnostico"),
+  ].filter(Boolean);
+  const entradaCota = getEntradaCota(escuta);
+  const preferenceSections = buildPreferenceSections(questionarioEscuta, respostas, escuta);
+  const avaliacoes = buildPaaiGuidanceItems(
+    respostas,
+    "barreiras_avaliacoes",
+    paaiEvaluationGuidance,
+  );
+  const didatica = buildPaaiGuidanceItems(
+    respostas,
+    "barreiras_didatica",
+    paaiDidacticGuidance,
+  );
+  const materiais = buildPaaiGuidanceItems(
+    respostas,
+    "barreiras_materiais",
+    paaiMaterialGuidance,
+    {
+      absenceValue: "nao_identifica",
+      absenceText: "O aluno informou que não possui barreiras quanto a esse item",
+    },
+  );
+  const impactAnswers = getArrayAnswer(respostas, "impacto_barreiras");
+  const impactos = impactAnswers.includes("sem_impactos_relevantes")
+    ? [getOptionLabel(questionarioEscuta, "impacto_barreiras", "sem_impactos_relevantes")]
+    : getAnswerLabels(questionarioEscuta, respostas, "impacto_barreiras");
   const encaminhamentos = getAnswerLabels(questionarioEscuta, respostas, "encaminhamentos");
+  const supportLevelAnswer = getAnswerLabel(questionarioEscuta, respostas, "classificacao_apoio");
+  const supportLevel =
+    supportLevelAnswer !== "-" ? supportLevelAnswer : escuta.classificacaoApoio || "-";
+  const hasTutor = getStringAnswer(respostas, "tem_tutor") === "sim";
+  const wantsTutor = getStringAnswer(respostas, "deseja_tutor") === "sim";
+  const tutorName = getStringAnswer(respostas, "nome_tutor") || escuta.nomeTutor || "";
+  const tutorPhone = getStringAnswer(respostas, "telefone_tutor") || escuta.telefoneTutor || "";
+  const summary = getStringAnswer(respostas, "resumo_caso") || escuta.resumoCaso || "";
+  const generatedReferrals = encaminhamentos.length ? encaminhamentos : escuta.encaminhamentos;
+  const accessibilityNeeds = buildAccessibilityNeeds(escuta);
+  const sensoryNeeds = buildSensoryNeeds(escuta);
+  const escutaDate = formatDatePtBr(escuta.realizadaEm ?? escuta.agendadaPara ?? escuta.createdAt);
+  const responsible = getStringAnswer(respostas, "responsavel_escuta");
 
   return (
     <section className={styles.paaiPanel} aria-label="Prévia do PAAI">
@@ -460,68 +965,183 @@ function PaaiPreviewPanel({
         <span>{getAnswerLabel(questionarioEscuta, respostas, "necessita_paai")}</span>
       </div>
 
-      <dl className={styles.detailGrid}>
-        <DetailField label="Nome" value={studentName} />
-        <DetailField
-          label="Matrícula"
-          value={escuta.estudante.cursoAtual?.matricula ?? person.matricula}
-        />
-        <DetailField label="Curso" value={escuta.estudante.cursoAtual?.nome ?? "-"} />
-        <DetailField label="Unidade" value={escuta.estudante.unidadeAcademica.sigla} />
-      </dl>
+      <div className={styles.paaiIntro}>
+        <p>Prezado(a) Professor(a),</p>
+        <p>
+          Este documento tem como finalidade orientar os docentes quanto à adoção de estratégias de
+          acessibilidade acadêmica, com base nas informações fornecidas pelo(a) estudante, em
+          processo de escuta pedagógica conduzido pelo NIPNE-EST, visando favorecer sua
+          participação, permanência e aprendizagem no contexto universitário.
+        </p>
+        <p>Seguem informações para conhecimento e providências:</p>
+      </div>
 
-      <div className={styles.readonlySection}>
-        <h4>Disciplinas e professores</h4>
-        <div className={styles.disciplinesTable}>
-          <Table
-            ariaLabel="Disciplinas para PAAI"
-            columns={[
-              {
-                key: "disciplina",
-                header: "Disciplina",
-                render: (link) => link.turma.disciplina.nome,
-              },
-              {
-                key: "professor",
-                header: "Professor",
-                render: (link) => getProfessorNames(link),
-              },
-            ]}
-            data={disciplineLinks}
-            getRowKey={(link) => link.id}
-            emptyMessage="Nenhuma disciplina vinculada ao aluno."
+      <section className={styles.paaiSection}>
+        <h4>1. IDENTIFICAÇÃO DO(A) ALUNO(A)</h4>
+        <p>Formulário de Identificação</p>
+        <dl className={`${styles.paaiQuestionList} ${styles.paaiGridList}`}>
+          <PaaiQuestionField label="Nome do Aluno(a)" value={identificationName} />
+          <PaaiQuestionField label="Matrícula" value={identificationRegistration} />
+          <PaaiQuestionField label="Curso" value={identificationCourse} />
+          <PaaiQuestionField label="Período" value={periodo} />
+          <PaaiQuestionField
+            label="Unidade"
+            value={
+              escuta.estudante.unidadeAcademica.nome || escuta.estudante.unidadeAcademica.sigla
+            }
           />
-        </div>
-      </div>
+          <PaaiQuestionField label="Disciplina" value={renderDisciplineSummary(disciplineLinks)} />
+          <PaaiQuestionField label="Professor(a)" value={renderProfessorSummary(disciplineLinks)} />
+          <PaaiQuestionField
+            label="Diagnóstico do aluno"
+            value={renderPaaiValueList(diagnosticoItems)}
+          />
+          <PaaiQuestionField label="Entrada por Cota" value={entradaCota} />
+        </dl>
+      </section>
 
-      <div className={styles.readonlySection}>
-        <h4>Preferências e necessidades observadas</h4>
-        <p>{getStringAnswer(respostas, "resumo_caso") || "-"}</p>
-      </div>
+      {preferenceSections.length ? (
+        <section className={styles.paaiSection}>
+          <h4>2. IDENTIFICAÇÃO/LEVANTAMENTO DAS PREFERÊNCIAS DO(A) ESTUDANTE:</h4>
+          <p>
+            O(A) estudante apresenta as seguintes preferências e necessidades que facilitam seu
+            processo de aprendizagem.
+          </p>
+          <dl className={styles.paaiQuestionList}>
+            {preferenceSections.map((section) => (
+              <PaaiQuestionField
+                key={section.titulo}
+                label={section.titulo}
+                value={renderPaaiValueList(section.items)}
+              />
+            ))}
+          </dl>
+        </section>
+      ) : null}
 
-      <div className={styles.paaiGuidanceGrid}>
-        <div>
-          <strong>Avaliações/atividades</strong>
-          <p>{avaliacoes.join(", ") || "-"}</p>
+      <section className={styles.paaiSection}>
+        <h4>3. ORIENTAÇÕES PARA ATENDER ÀS NECESSIDADES DIDÁTICO-PEDAGÓGICAS</h4>
+        <p>
+          Considerando a escuta realizada em {escutaDate || "-"} e visando promover condições de
+          participação, aprendizagem e acessibilidade no contexto acadêmico, orienta-se a adoção das
+          seguintes estratégias e condições de acessibilidade pedagógica, com foco na redução de
+          barreiras que possam impactar o percurso educacional do(a) estudante:
+        </p>
+        <div className={styles.paaiQuestionList}>
+          <div className={styles.paaiQuestion}>
+            <dt>3.1 Em atividades avaliativas;</dt>
+            <dd>{renderGuidanceList(avaliacoes)}</dd>
+          </div>
+          <div className={styles.paaiQuestion}>
+            <dt>3.2 Em relação à didática e comunicação;</dt>
+            <dd>{renderGuidanceList(didatica)}</dd>
+          </div>
+          <div className={styles.paaiQuestion}>
+            <dt>3.3 Em relação ao acesso a tecnologias e materiais.</dt>
+            <dd>{renderGuidanceList(materiais)}</dd>
+          </div>
         </div>
-        <div>
-          <strong>Didática e comunicação</strong>
-          <p>{didatica.join(", ") || "-"}</p>
-        </div>
-        <div>
-          <strong>Materiais e tecnologia</strong>
-          <p>{materiais.join(", ") || "-"}</p>
-        </div>
-        <div>
-          <strong>Impactos acadêmicos</strong>
-          <p>{impactos.join(", ") || "-"}</p>
-        </div>
-      </div>
+      </section>
 
-      <div className={styles.readonlySection}>
-        <h4>Encaminhamentos NIPNE</h4>
-        <p>{encaminhamentos.join(", ") || "-"}</p>
-      </div>
+      <section className={styles.paaiSection}>
+        <h4>4. NECESSIDADES COMPLEMENTARES DE ACESSIBILIDADE ACADÊMICA</h4>
+        <dl className={styles.paaiQuestionList}>
+          <PaaiQuestionField label="Classificação do nível de apoio" value={supportLevel} />
+          {accessibilityNeeds.length ? (
+            <PaaiQuestionField
+              label="Recursos de acessibilidade e apoio à aprendizagem"
+              value={renderPaaiValueList(accessibilityNeeds)}
+            />
+          ) : null}
+          {sensoryNeeds.length ? (
+            <PaaiQuestionField
+              label="Aspectos sensoriais, organizacionais e de autorregulação"
+              value={renderPaaiValueList(sensoryNeeds)}
+            />
+          ) : null}
+          {hasTutor || wantsTutor ? (
+            <div className={styles.paaiQuestion}>
+              <dt>Tutoria</dt>
+              <dd>
+                {hasTutor ? (
+                  <dl className={styles.paaiQuestionList}>
+                    <PaaiQuestionField label="Nome do tutor" value={tutorName} />
+                    <PaaiQuestionField label="Contato do tutor" value={tutorPhone} />
+                  </dl>
+                ) : (
+                  renderPaaiValueList(["Tutoria"])
+                )}
+              </dd>
+            </div>
+          ) : null}
+          <PaaiQuestionField
+            label="Impactos das barreiras identificadas"
+            value={renderPaaiValueList(impactos)}
+          />
+        </dl>
+      </section>
+
+      <section className={styles.paaiSection}>
+        <h4>5. OBSERVAÇÕES DO NIPNE</h4>
+        <div className={styles.paaiQuestionList}>
+          <div className={styles.paaiQuestion}>
+            <dt>Texto institucional padrão</dt>
+            <dd>
+              <div className={styles.paaiTextBlock}>
+                <p>{paaiInstitutionalParagraphs[0]}</p>
+                <ul className={styles.paaiAnswerList}>
+                  {paaiInstitutionalActions.map((action) => (
+                    <li key={action}>{action}</li>
+                  ))}
+                </ul>
+                <p>{paaiInstitutionalParagraphs[1]}</p>
+                <p>{paaiInstitutionalParagraphs[2]}</p>
+              </div>
+            </dd>
+          </div>
+          <div className={styles.paaiQuestion}>
+            <dt>Observações específicas do caso</dt>
+            <dd>
+              <TextField
+                value={summary}
+                multiline
+                minRows={4}
+                fullWidth
+                slotProps={{ input: { readOnly: true } }}
+              />
+            </dd>
+          </div>
+          <div className={styles.paaiQuestion}>
+            <dt>Encaminhamentos</dt>
+            <dd>
+              <TextField
+                value={generatedReferrals.join("\n")}
+                multiline
+                minRows={4}
+                fullWidth
+                slotProps={{ input: { readOnly: true } }}
+              />
+            </dd>
+          </div>
+        </div>
+      </section>
+
+      <section className={styles.paaiSection}>
+        <h4>5. VALIDADE E ACOMPANHAMENTO</h4>
+        <dl className={`${styles.paaiQuestionList} ${styles.paaiGridList}`}>
+          <PaaiQuestionField
+            label="Validade"
+            value="Este documento poderá ser revisto a qualquer momento, conforme necessidade identificada pelo(a) estudante, docentes ou NIPNE-EST."
+          />
+          <PaaiQuestionField label="Núcleo de Inclusão" value="EST/UEA" />
+          <PaaiQuestionField label="Contato" value="nucleoinclusao.est@uea.edu.br" />
+          <PaaiQuestionField
+            label="Responsável pelo encaminhamento"
+            value={responsible || "Profa. Áurea Hiléia da Silva Melo"}
+          />
+          <PaaiQuestionField label="Data da escuta" value={escutaDate} />
+        </dl>
+      </section>
     </section>
   );
 }
@@ -529,9 +1149,10 @@ function PaaiPreviewPanel({
 interface EscutaReadOnlyPanelProps {
   escuta: Escuta;
   questionarioEscuta: QuestionarioEscuta | null | undefined;
+  onEdit: () => void;
 }
 
-function EscutaReadOnlyPanel({ escuta, questionarioEscuta }: EscutaReadOnlyPanelProps) {
+function EscutaReadOnlyPanel({ escuta, questionarioEscuta, onEdit }: EscutaReadOnlyPanelProps) {
   const respostas = escuta.respostasQuestionarioEscuta ?? {};
 
   if (!questionarioEscuta || !escuta.respostasQuestionarioEscuta) {
@@ -555,6 +1176,11 @@ function EscutaReadOnlyPanel({ escuta, questionarioEscuta }: EscutaReadOnlyPanel
 
   return (
     <section className={styles.readonlyAnswers} aria-label="Respostas da escuta">
+      <div className={styles.readonlyActions}>
+        <Button variant="outlined" startIcon={<EditOutlinedIcon />} onClick={onEdit}>
+          Editar escuta
+        </Button>
+      </div>
       {questionarioEscuta.secoes.map((secao) => {
         const visibleQuestions = secao.perguntas.filter((pergunta) =>
           matchesQuestionCondition(pergunta, respostas),
@@ -610,6 +1236,20 @@ function EscutaDetailsDrawer({
     open && Boolean(escuta?.estudante.id),
   );
   const disciplineLinks = classGroupStudentsQuery.data?.data ?? [];
+  const canShowEscuta = escuta?.status === "REALIZADA";
+  const canShowPaai =
+    canShowEscuta &&
+    getStringAnswer(escuta?.respostasQuestionarioEscuta, "necessita_paai") === "sim";
+  const displayedTab: DetailsTab =
+    activeTab === "paai"
+      ? canShowPaai
+        ? "paai"
+        : canShowEscuta
+          ? "escuta"
+          : "gerais"
+      : activeTab === "escuta" && canShowEscuta
+        ? "escuta"
+        : "gerais";
 
   if (!escuta) {
     return null;
@@ -660,30 +1300,32 @@ function EscutaDetailsDrawer({
         <nav className={styles.detailsTabs} aria-label="Seções da escuta">
           <button
             type="button"
-            className={activeTab === "gerais" ? styles.activeTab : ""}
+            className={displayedTab === "gerais" ? styles.activeTab : ""}
             onClick={() => setActiveTab("gerais")}
           >
             Dados Gerais
           </button>
-          <button
-            type="button"
-            className={activeTab === "paai" ? styles.activeTab : ""}
-            onClick={() => setActiveTab("paai")}
-          >
-            PAAI
-          </button>
-          {escuta.status === "REALIZADA" ? (
+          {canShowEscuta ? (
             <button
               type="button"
-              className={activeTab === "escuta" ? styles.activeTab : ""}
+              className={displayedTab === "escuta" ? styles.activeTab : ""}
               onClick={() => setActiveTab("escuta")}
             >
               Escuta
             </button>
           ) : null}
+          {canShowPaai ? (
+            <button
+              type="button"
+              className={displayedTab === "paai" ? styles.activeTab : ""}
+              onClick={() => setActiveTab("paai")}
+            >
+              PAAI
+            </button>
+          ) : null}
         </nav>
 
-        {activeTab === "gerais" ? (
+        {displayedTab === "gerais" ? (
           <>
             <section className={styles.scheduleSummary} aria-label="Resumo do agendamento">
               <DetailField label="Status" value={statusLabels[escuta.status]} />
@@ -748,15 +1390,13 @@ function EscutaDetailsDrawer({
               </div>
             </section>
           </>
-        ) : activeTab === "paai" ? (
-          <PaaiPreviewPanel
-            escuta={escuta}
-            questionarioEscuta={questionarioEscuta}
-            disciplineLinks={disciplineLinks}
-          />
-        ) : (
+        ) : displayedTab === "escuta" && canShowEscuta ? (
           <>
-            <EscutaReadOnlyPanel escuta={escuta} questionarioEscuta={questionarioEscuta} />
+            <EscutaReadOnlyPanel
+              escuta={escuta}
+              questionarioEscuta={questionarioEscuta}
+              onEdit={() => onOpenQuestionnaire(escuta)}
+            />
             {false ? (
               <section className={styles.paaiPanel}>
             <dl className={styles.detailGrid}>
@@ -786,6 +1426,16 @@ function EscutaDetailsDrawer({
               </section>
             ) : null}
           </>
+        ) : canShowPaai ? (
+          <PaaiPreviewPanel
+            escuta={escuta}
+            questionarioEscuta={questionarioEscuta}
+            disciplineLinks={disciplineLinks}
+          />
+        ) : (
+          <section className={styles.readonlySection}>
+            <p>Selecione uma seção disponível para visualizar a escuta.</p>
+          </section>
         )}
 
         <footer className={styles.detailsActions}>
@@ -1015,6 +1665,7 @@ function QuestionnaireDrawer({
     return null;
   }
 
+  const isEditing = escuta.status === "REALIZADA";
   const visibleQuestions = getAllQuestions(questionarioEscuta).filter((pergunta) =>
     matchesQuestionCondition(pergunta, values),
   );
@@ -1044,6 +1695,21 @@ function QuestionnaireDrawer({
   const toggleMultipleAnswer = (questionId: string, value: string, checked: boolean) => {
     setValues((current) => {
       const answers = getArrayAnswer(current, questionId);
+      const noRelevantImpacts = "sem_impactos_relevantes";
+
+      if (questionId === "impacto_barreiras" && value === noRelevantImpacts && checked) {
+        return {
+          ...current,
+          [questionId]: [noRelevantImpacts],
+        };
+      }
+
+      if (questionId === "impacto_barreiras" && value !== noRelevantImpacts && checked) {
+        return {
+          ...current,
+          [questionId]: [...new Set([...answers.filter((answer) => answer !== noRelevantImpacts), value])],
+        };
+      }
 
       return {
         ...current,
@@ -1178,7 +1844,7 @@ function QuestionnaireDrawer({
           <div className={styles.drawerHeader}>
             <AssignmentTurnedInOutlinedIcon />
             <h2>
-              Atendimento de {getStudentName(escuta)}{" "}
+              {isEditing ? "Editar escuta" : "Atendimento"} de {getStudentName(escuta)}{" "}
               <span>(ID: {escuta.id.slice(0, 8)})</span>
             </h2>
           </div>
@@ -1215,7 +1881,7 @@ function QuestionnaireDrawer({
               Cancelar
             </Button>
             <Button type="submit" variant="contained" disabled={!canSubmit || isSubmitting}>
-              Finalizar
+              {isEditing ? "Salvar alterações" : "Finalizar"}
             </Button>
           </div>
         </form>
@@ -1228,16 +1894,22 @@ function QuestionnaireDrawer({
         </DialogTitle>
         <DialogContent className={styles.confirmContent}>
           <p>
-            Tem certeza que deseja finalizar a escuta do(a) aluno(a) {getStudentName(escuta)}?
+            {isEditing
+              ? `Tem certeza que deseja salvar as alterações da escuta do(a) aluno(a) ${getStudentName(escuta)}?`
+              : `Tem certeza que deseja finalizar a escuta do(a) aluno(a) ${getStudentName(escuta)}?`}
           </p>
-          <strong>Essa ação não pode ser desfeita.</strong>
+          <strong>
+            {isEditing
+              ? "As respostas serão atualizadas e refletidas no PAAI."
+              : "Essa ação não pode ser desfeita."}
+          </strong>
         </DialogContent>
         <DialogActions className={styles.scheduleActions}>
           <Button variant="outlined" onClick={() => setConfirmOpen(false)} disabled={isSubmitting}>
             Cancelar
           </Button>
           <Button variant="contained" onClick={handleConfirm} disabled={!canSubmit || isSubmitting}>
-            Finalizar
+            {isEditing ? "Salvar alterações" : "Finalizar"}
           </Button>
         </DialogActions>
       </Dialog>
@@ -1264,7 +1936,7 @@ export function EscutasPage() {
       page,
       pageSize,
       ...(statusFilter !== "TODAS" ? { status: statusFilter } : {}),
-      ...(searchTerm.trim() ? { nome: searchTerm.trim() } : {}),
+      ...(searchTerm.trim() ? { search: searchTerm.trim() } : {}),
       ...(unidadeAcademicaId ? { unidadeAcademicaId } : {}),
     }),
     [page, searchTerm, statusFilter, unidadeAcademicaId],
@@ -1348,16 +2020,24 @@ export function EscutasPage() {
       return;
     }
 
+    const isEditing = questionnaireEscuta.status === "REALIZADA";
+
     try {
       await finishQuestionnaireMutation.mutateAsync({
         id: questionnaireEscuta.id,
         data,
       });
-      toast.success("Questionário da escuta finalizado.");
+      toast.success(
+        isEditing ? "Questionário da escuta atualizado." : "Questionário da escuta finalizado.",
+      );
       setQuestionnaireEscuta(null);
     } catch (error) {
       toast.error(
-        error instanceof Error ? error.message : "Não foi possível finalizar a escuta.",
+        error instanceof Error
+          ? error.message
+          : isEditing
+            ? "Não foi possível atualizar a escuta."
+            : "Não foi possível finalizar a escuta.",
       );
     }
   };

@@ -5,6 +5,7 @@ import type { Escuta, StatusEscuta } from "../interfaces/escuta";
 export interface EscutasListQueryApiDto {
   page?: number;
   pageSize?: number;
+  search?: string;
   status?: StatusEscuta;
   estudanteId?: string;
   unidadeAcademicaId?: string;

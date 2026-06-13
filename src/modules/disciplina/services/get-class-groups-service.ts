@@ -5,6 +5,7 @@ import type { DisciplinaOferta } from "../interfaces/disciplina-oferta";
 export interface ClassGroupsListQueryApiDto {
   page?: number;
   pageSize?: number;
+  search?: string;
   disciplinaId?: string;
   cursoId?: string;
   periodoLetivoId?: string;

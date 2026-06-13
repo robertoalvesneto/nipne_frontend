@@ -6,7 +6,6 @@ import { IconButton, Tooltip } from "@mui/material";
 import { useEffect, type ReactNode } from "react";
 import { Table, type TableColumn } from "@/shared/components/table/table";
 import type { PaginatedResponseMeta } from "@/shared/types/paginated-response-type";
-import { normalizeText } from "@/shared/utils/normalize-text";
 import { useStudents } from "../../hooks/use-get-students";
 import type { StudentListItem } from "../../interfaces/student";
 import type { StudentsListQueryApiDto } from "../../services/get-students-service";
@@ -113,38 +112,15 @@ export function AlunosTable({
 }: AlunosTableProps) {
   const studentsQuery = useStudents(filters);
   const alunos = studentsQuery.data?.data ?? [];
-  const normalizedSearchTerm = normalizeText(searchTerm);
 
   useEffect(() => {
     onMetaChange?.(studentsQuery.data?.meta);
   }, [onMetaChange, studentsQuery.data?.meta]);
 
-  const rows: AlunoTableRow[] = alunos
-    .filter((aluno) => {
-      if (!normalizedSearchTerm) {
-        return true;
-      }
-
-      const searchableText = [
-        aluno.pessoaInstitucional.nome,
-        aluno.pessoaInstitucional.nomeSocial,
-        aluno.pessoaInstitucional.emailInstitucional,
-        aluno.pessoaInstitucional.matricula,
-        aluno.cursoAtual?.nome,
-        aluno.cursoAtual?.sigla,
-        aluno.cursoAtual?.matricula,
-        aluno.unidadeAcademica.nome,
-        aluno.unidadeAcademica.sigla,
-      ]
-        .filter(Boolean)
-        .join(" ");
-
-      return normalizeText(searchableText).includes(normalizedSearchTerm);
-    })
-    .map((aluno) => ({
-      ...aluno,
-      onAlunoClick: onViewAluno,
-    }));
+  const rows: AlunoTableRow[] = alunos.map((aluno) => ({
+    ...aluno,
+    onAlunoClick: onViewAluno,
+  }));
 
   return (
     <Table

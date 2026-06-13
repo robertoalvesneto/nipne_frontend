@@ -5,6 +5,7 @@ import type { Professor } from "../interfaces/professor";
 export interface ProfessoresListQueryApiDto {
   page?: number;
   pageSize?: number;
+  search?: string;
   nome?: string;
   nomeSocial?: string;
   emailInstitucional?: string;

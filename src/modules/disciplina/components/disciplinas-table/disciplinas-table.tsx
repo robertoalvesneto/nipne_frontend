@@ -6,7 +6,6 @@ import VisibilityOutlinedIcon from "@mui/icons-material/VisibilityOutlined";
 import { IconButton, Tooltip } from "@mui/material";
 import { Table, type TableColumn } from "@/shared/components/table/table";
 import type { PaginatedResponseMeta } from "@/shared/types/paginated-response-type";
-import { normalizeText } from "@/shared/utils/normalize-text";
 import { useClassGroups } from "../../hooks/use-get-class-groups";
 import type { DisciplinaOferta } from "../../interfaces/disciplina-oferta";
 import type { ClassGroupsListQueryApiDto } from "../../services/get-class-groups-service";
@@ -130,36 +129,15 @@ export function DisciplinasTable({
 }: DisciplinasTableProps) {
   const disciplinasQuery = useClassGroups(filters);
   const disciplinas = disciplinasQuery.data?.data ?? [];
-  const normalizedSearchTerm = normalizeText(searchTerm);
 
   useEffect(() => {
     onMetaChange?.(disciplinasQuery.data?.meta);
   }, [onMetaChange, disciplinasQuery.data?.meta]);
 
-  const rows: DisciplinaTableRow[] = disciplinas
-    .filter((disciplina) => {
-      if (!normalizedSearchTerm) {
-        return true;
-      }
-
-      const searchableText = [
-        disciplina.disciplina.nome,
-        disciplina.sigla,
-        disciplina.disciplina.curso.nome,
-        disciplina.disciplina.curso.sigla,
-        disciplina.periodoLetivo.nome,
-        getPeriodoAnoMes(disciplina),
-        getProfessorText(disciplina),
-        String(disciplina.matriculados),
-        String(disciplina.disciplina.cargaHoraria),
-      ].join(" ");
-
-      return normalizeText(searchableText).includes(normalizedSearchTerm);
-    })
-    .map((disciplina) => ({
-      ...disciplina,
-      onDisciplinaClick: onViewDisciplina,
-    }));
+  const rows: DisciplinaTableRow[] = disciplinas.map((disciplina) => ({
+    ...disciplina,
+    onDisciplinaClick: onViewDisciplina,
+  }));
 
   return (
     <Table
