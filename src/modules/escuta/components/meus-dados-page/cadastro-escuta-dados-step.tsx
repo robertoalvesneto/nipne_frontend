@@ -165,11 +165,9 @@ export function CadastroEscutaDadosStep({
           <TextField
             label="E-mail institucional"
             value={values.emailInstitucional}
-            onChange={(event) =>
-              onValueChange("emailInstitucional", event.target.value)
-            }
             size="small"
             required
+            disabled
           />
           <FormControl size="small">
             <InputLabel id="modalidade-label">Modalidade</InputLabel>

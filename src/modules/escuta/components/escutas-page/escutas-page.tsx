@@ -37,6 +37,7 @@ import { useAuthSession } from "@/modules/auth/hooks/use-auth-session";
 import { PaginationControls } from "@/shared/components/pagination-controls/pagination-controls";
 import { Table, type TableColumn } from "@/shared/components/table/table";
 import { formatDatePtBr } from "@/shared/utils/format-date";
+import { formatRegistration } from "@/shared/utils/registration";
 import { useFinishEscutaQuestionario } from "../../hooks/use-finish-escuta-questionario";
 import { useEscutas } from "../../hooks/use-get-escutas";
 import { useQuestionarioEscuta } from "../../hooks/use-get-questionario-escuta";
@@ -100,16 +101,6 @@ function getStudentName(escuta: Escuta) {
     escuta.estudante.pessoaInstitucional.nomeSocial?.trim() ||
     escuta.estudante.pessoaInstitucional.nome
   );
-}
-
-function isUuidLike(value: string) {
-  return /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(
-    value.trim(),
-  );
-}
-
-function getSafeRegistration(...values: Array<string | null | undefined>) {
-  return values.find((value) => value?.trim() && !isUuidLike(value))?.trim() || "-";
 }
 
 function getDateTimeParts(date?: string | null) {
@@ -966,7 +957,7 @@ function PaaiPreviewPanel({
   const studentName = getStudentName(escuta);
   const identificationName =
     getQuestionTextAnswerByNumber(questionarioEscuta, respostas, 1, ["nome"]) || studentName;
-  const identificationRegistration = getSafeRegistration(
+  const identificationRegistration = formatRegistration(
     getCadastroStringAnswer(escuta, "matricula_institucional"),
     escuta.estudante.cursoAtual?.matricula,
     person.matricula,
@@ -1441,7 +1432,10 @@ function EscutaDetailsDrawer({
               />
               <DetailField
                 label="Matrícula"
-                value={escuta.estudante.cursoAtual?.matricula ?? person.matricula}
+                value={formatRegistration(
+                  escuta.estudante.cursoAtual?.matricula,
+                  person.matricula,
+                )}
               />
               <DetailField label="Modalidade" value={escuta.modalidadeCurso ?? "-"} />
               <DetailField label="Contato (Whatsapp)" value={escuta.telefoneWhatsapp ?? "-"} />
@@ -2078,7 +2072,10 @@ export function EscutasPage() {
         key: "matricula",
         header: "Matrícula",
         render: (row) =>
-          row.estudante.cursoAtual?.matricula ?? row.estudante.pessoaInstitucional.matricula,
+          formatRegistration(
+            row.estudante.cursoAtual?.matricula,
+            row.estudante.pessoaInstitucional.matricula,
+          ),
       },
       {
         key: "data",

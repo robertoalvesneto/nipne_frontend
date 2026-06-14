@@ -20,9 +20,6 @@ export const alunoFormSchema = z.object({
   dataNascimento: z.string().optional(),
   cursoId: z.string().uuid("Selecione um curso válido"),
   telefone: z.string().trim().max(20).optional(),
-  contatoApoioNome: z.string().trim().max(150).optional(),
-  contatoApoioTelefone: z.string().trim().max(20).optional(),
-  contatoApoioRelacao: z.string().trim().max(100).optional(),
 });
 
 export type AlunoFormValues = z.infer<typeof alunoFormSchema>;

@@ -3,6 +3,7 @@ import {
   Checkbox,
   FormControl,
   FormControlLabel,
+  FormHelperText,
   FormLabel,
   Radio,
   RadioGroup,
@@ -162,6 +163,11 @@ export function CadastroEscutaQuestionarioStep({
                     <FormLabel required={question.obrigatoria}>
                       {question.numero}. {question.titulo}
                     </FormLabel>
+                    {question.ajuda ? (
+                      <FormHelperText className={styles.questionHelp}>
+                        {question.ajuda}
+                      </FormHelperText>
+                    ) : null}
                     <RadioGroup
                       value={typeof answer === "string" ? answer : ""}
                       onChange={(event) => onAnswerChange(question.id, event.target.value)}
@@ -188,6 +194,11 @@ export function CadastroEscutaQuestionarioStep({
                     <FormLabel required={question.obrigatoria}>
                       {question.numero}. {question.titulo}
                     </FormLabel>
+                    {question.ajuda ? (
+                      <FormHelperText className={styles.questionHelp}>
+                        {question.ajuda}
+                      </FormHelperText>
+                    ) : null}
                     <div className={styles.checkboxGroup}>
                       {question.opcoes?.map((option) => (
                         <FormControlLabel
@@ -228,6 +239,7 @@ export function CadastroEscutaQuestionarioStep({
                       isPhone ? formatPhone(event.target.value) : event.target.value,
                     )
                   }
+                  helperText={question.ajuda}
                   required={question.obrigatoria}
                   multiline={question.tipo === "texto_longo"}
                   minRows={question.tipo === "texto_longo" ? 4 : undefined}

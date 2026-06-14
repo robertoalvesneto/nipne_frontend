@@ -6,6 +6,7 @@ import { IconButton, Tooltip } from "@mui/material";
 import { useEffect, type ReactNode } from "react";
 import { Table, type TableColumn } from "@/shared/components/table/table";
 import type { PaginatedResponseMeta } from "@/shared/types/paginated-response-type";
+import { formatRegistration } from "@/shared/utils/registration";
 import { useStudents } from "../../hooks/use-get-students";
 import type { StudentListItem } from "../../interfaces/student";
 import type { StudentsListQueryApiDto } from "../../services/get-students-service";
@@ -32,7 +33,7 @@ function getAlunoNome(aluno: StudentListItem) {
 }
 
 function getMatricula(aluno: StudentListItem) {
-  return aluno.cursoAtual?.matricula || aluno.pessoaInstitucional.matricula;
+  return formatRegistration(aluno.cursoAtual?.matricula, aluno.pessoaInstitucional.matricula);
 }
 
 const columns: TableColumn<AlunoTableRow>[] = [

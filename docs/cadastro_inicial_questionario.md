@@ -51,7 +51,7 @@
 [] Necessidade de material ampliado  
 [] Necessidade de leitor de tela  
 [] Necessidade de audiodescrição  
-[] Necessidade de ledor  
+[] Necessidade de ledor 
 [] Outro: ______________________________  
 
 **21. Se você marcou deficiência auditiva/pessoa surda, selecione qual ou quais das opções abaixo você se identifica:**

@@ -17,6 +17,7 @@ import {
 import { toast } from "react-toastify";
 import { PaginationControls } from "@/shared/components/pagination-controls/pagination-controls";
 import type { PaginatedResponseMeta } from "@/shared/types/paginated-response-type";
+import { getSafeRegistration } from "@/shared/utils/registration";
 import { useCreateCourseEnrollment } from "../../hooks/use-create-course-enrollment";
 import { useCreateStudent } from "../../hooks/use-create-student";
 import { useCourseEnrollments } from "../../hooks/use-get-course-enrollments";
@@ -118,23 +119,20 @@ export function AlunosPage() {
       details.contatosTelefonicos.find(
         (contact) => contact.formaPreferencialContato,
       ) ?? details.contatosTelefonicos[0];
-    const contatoApoio = details.contatosApoio[0];
 
     return {
       nome: details.pessoaInstitucional.nome,
       nomeSocial: details.pessoaInstitucional.nomeSocial ?? "",
       emailInstitucional: details.pessoaInstitucional.emailInstitucional,
-      matricula:
-        activeCourseEnrollment?.matricula ??
-        selectedAluno.cursoAtual?.matricula ??
+      matricula: getSafeRegistration(
+        activeCourseEnrollment?.matricula,
+        selectedAluno.cursoAtual?.matricula,
         details.pessoaInstitucional.matricula,
+      ),
       dataNascimento: getDateInputValue(details.dataNascimento),
       cursoId:
         activeCourseEnrollment?.curso.id ?? selectedAluno.cursoAtual?.id ?? "",
       telefone: telefonePreferencial?.telefone ?? "",
-      contatoApoioNome: contatoApoio?.nome ?? "",
-      contatoApoioTelefone: contatoApoio?.telefone ?? "",
-      contatoApoioRelacao: contatoApoio?.relacao ?? "",
     };
   }, [
     activeCourseEnrollment?.curso.id,
@@ -210,20 +208,6 @@ export function AlunosPage() {
           },
         ]
       : [];
-    const hasSupportContact =
-      values.contatoApoioNome &&
-      values.contatoApoioTelefone &&
-      values.contatoApoioRelacao;
-    const contatosApoio = hasSupportContact
-      ? [
-          {
-            nome: values.contatoApoioNome!,
-            telefone: values.contatoApoioTelefone!,
-            relacao: values.contatoApoioRelacao!,
-          },
-        ]
-      : [];
-
     try {
       if (formMode === "edit") {
         if (!selectedAluno) {
@@ -243,7 +227,6 @@ export function AlunosPage() {
               : {}),
             unidadeAcademicaId: course.unidadeAcademica.id,
             contatosTelefonicos,
-            contatosApoio,
           },
         });
 
@@ -282,7 +265,6 @@ export function AlunosPage() {
           : {}),
         unidadeAcademicaId: course.unidadeAcademica.id,
         ...(contatosTelefonicos.length ? { contatosTelefonicos } : {}),
-        ...(contatosApoio.length ? { contatosApoio } : {}),
       });
 
       await createCourseEnrollmentMutation.mutateAsync({

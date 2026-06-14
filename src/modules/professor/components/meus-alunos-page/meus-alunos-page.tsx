@@ -15,6 +15,7 @@ import { useClassGroups } from "@/modules/disciplina/hooks/use-get-class-groups"
 import type { DisciplinaOferta } from "@/modules/disciplina/interfaces/disciplina-oferta";
 import { PaginationControls } from "@/shared/components/pagination-controls/pagination-controls";
 import { Table, type TableColumn } from "@/shared/components/table/table";
+import { formatRegistration, getSafeRegistration } from "@/shared/utils/registration";
 import { useProfessores } from "../../hooks/use-get-professores";
 import type { Professor } from "../../interfaces/professor";
 import styles from "./meus-alunos-page.module.css";
@@ -83,7 +84,7 @@ export function MeusAlunosPage() {
   const [selectedCourseId, setSelectedCourseId] = useState(allCoursesValue);
   const [selectedClassGroupId, setSelectedClassGroupId] = useState(allClassGroupsValue);
   const professorEmail = session?.payload.emailInstitucional ?? "";
-  const professorMatricula = session?.payload.matricula ?? "";
+  const professorMatricula = getSafeRegistration(session?.payload.matricula);
 
   const professorByEmailQuery = useProfessores(
     {
@@ -185,7 +186,7 @@ export function MeusAlunosPage() {
         key: "matricula",
         header: "Matrícula",
         width: "14%",
-        render: (row) => row.estudante.pessoaInstitucional.matricula,
+        render: (row) => formatRegistration(row.estudante.pessoaInstitucional.matricula),
       },
       {
         key: "nome",

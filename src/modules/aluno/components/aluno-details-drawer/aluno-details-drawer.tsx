@@ -19,6 +19,7 @@ import { useMemo, useState } from "react";
 import { toast } from "react-toastify";
 import { useClassGroups } from "@/modules/disciplina/hooks/use-get-class-groups";
 import { formatDatePtBr } from "@/shared/utils/format-date";
+import { formatRegistration } from "@/shared/utils/registration";
 import { useCreateClassGroupStudent } from "../../hooks/use-create-class-group-student";
 import { useDeleteClassGroupStudent } from "../../hooks/use-delete-class-group-student";
 import { useClassGroupStudents } from "../../hooks/use-get-class-group-students";
@@ -250,8 +251,10 @@ export function AlunoDetailsDrawer({
               <div>
                 <dt>Matrícula</dt>
                 <dd>
-                  {aluno.cursoAtual?.matricula ??
-                    aluno.pessoaInstitucional.matricula}
+                  {formatRegistration(
+                    aluno.cursoAtual?.matricula,
+                    aluno.pessoaInstitucional.matricula,
+                  )}
                 </dd>
               </div>
               <div>

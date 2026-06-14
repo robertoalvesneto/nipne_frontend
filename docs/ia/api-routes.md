@@ -139,6 +139,7 @@ type StatusEscuta =
 | `POST` | `/api/v1/escutas` | Solicita escuta inicial |
 | `GET` | `/api/v1/escutas` | Lista escutas |
 | `GET` | `/api/v1/escutas/:id` | Busca escuta |
+| `GET` | `/api/v1/escutas/:id/paai` | Busca PAAI gerado para a escuta |
 | `PATCH` | `/api/v1/escutas/:id/cadastro` | Atualiza dados iniciais da escuta |
 | `PATCH` | `/api/v1/escutas/:id/agendar` | Agenda escuta |
 | `PATCH` | `/api/v1/escutas/:id/questionario` | Finaliza questionario da escuta |
@@ -1219,6 +1220,51 @@ Resposta: `PaginatedResponse<Escuta>`.
 ### `GET /api/v1/escutas/:id`
 
 Resposta: `Escuta`.
+
+### `GET /api/v1/escutas/:id/paai`
+
+Resposta:
+
+```ts
+type Paai = {
+  id: string;
+  escutaId: string;
+  versao: string;
+  conteudo: {
+    title: string;
+    version: string;
+    generatedAt: string;
+    escutaId: string;
+    estudanteId: string;
+    necessidadePaai: string | null;
+    sections: Array<{
+      order: number;
+      title: string;
+      text?: string[];
+      fields?: Array<{
+        label: string;
+        value?: string;
+        items?: string[];
+      }>;
+      subsections?: Array<{
+        title: string;
+        text?: string[];
+        items?: string[];
+      }>;
+    }>;
+  };
+  observacoesEspecificas?: string | null;
+  encaminhamentos: string[];
+  createdAt: string;
+  updatedAt: string;
+};
+```
+
+Regras adicionais:
+
+- O PAAI e gerado e salvo quando a escuta e finalizada com `necessita_paai = "sim"`.
+- Se a escuta for atualizada e deixar de exigir PAAI, o PAAI salvo e removido.
+- Caso uma escuta antiga ainda nao tenha PAAI salvo, a rota gera e salva sob demanda quando a escuta indicar necessidade de PAAI.
 
 ### `PATCH /api/v1/escutas/:id/cadastro`
 
